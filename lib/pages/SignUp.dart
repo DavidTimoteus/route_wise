@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/pages/Login.dart';
 
@@ -33,13 +34,14 @@ class _SignUp extends State<SignUp> {
           child: Column(
             children: <Widget>[
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                height: MediaQuery.of(context).size.height - 100,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                height: MediaQuery.of(context).size.height - 130,
                 width: double.infinity,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Container(
+                      padding: EdgeInsets.only(top: 20),
                       alignment: Alignment.topLeft,
                       child: RichText(
                         text: TextSpan(
@@ -57,7 +59,7 @@ class _SignUp extends State<SignUp> {
                               style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 30,
-                                color: Color.fromRGBO(228, 95, 43, 1),
+                                color: const Color.fromRGBO(228, 95, 43, 1),
                               ),
                             ),
                             TextSpan(
@@ -73,11 +75,35 @@ class _SignUp extends State<SignUp> {
                       ),
                     ),
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(29)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 40),
+                      child: Column(
+                        children: [
+                          inputFile(
+                              label: 'Full Name',
+                              icon: FontAwesomeIcons.solidCircleUser),
+                          inputFile(
+                              label: 'Email',
+                              icon: FontAwesomeIcons.solidEnvelope),
+                          inputFile(
+                              label: 'Password',
+                              obscureText: true,
+                              icon: FontAwesomeIcons.key),
+                          inputFile(
+                              label: 'Phone Number',
+                              icon: FontAwesomeIcons.phone),
+                          inputFile(
+                              label: 'Occupation',
+                              icon: FontAwesomeIcons.solidAddressCard)
+                        ],
+                      ),
                     ),
                     Container(
                       child: MaterialButton(
@@ -120,7 +146,7 @@ class _SignUp extends State<SignUp> {
                         )
                       ],
                     ),
-                    Padding(padding: EdgeInsets.only(bottom: 0))
+                    const Padding(padding: EdgeInsets.only(bottom: 0))
                   ],
                 ),
               ),
@@ -128,4 +154,39 @@ class _SignUp extends State<SignUp> {
           ),
         ));
   }
+}
+
+Widget inputFile(
+    {required label, obscureText = false, required IconData icon}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      const SizedBox(
+        height: 5,
+      ),
+      Text(
+        label,
+        style: GoogleFonts.montserrat(
+            fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+      ),
+      const SizedBox(
+        height: 5,
+      ),
+      TextField(
+        obscureText: obscureText,
+        decoration: InputDecoration(
+            prefixIcon: Icon(
+              icon,
+              color: Colors.black87,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black87),
+            ),
+            border: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.black87))),
+      ),
+    ],
+  );
 }
