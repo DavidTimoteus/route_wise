@@ -1,6 +1,6 @@
 # route_wise
 
-A new Flutter project.
+Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. Aplikasi ini dibangun dengan bahasa Dart dan Framework Flutter, yang dalam perancangannya terintegrasi dengan ERP Odoo dalam Mata Kuliah Perencanaan Sumber Daya. Tujuan dari aplikasi ini adalah untuk mempermudah dalam proses pengiriman barang (rokok) dikarenakan menyediakan berbagai alternatif rute yang tercepat dalam melakukan pengiriman.
 
 ## Getting Started
 
