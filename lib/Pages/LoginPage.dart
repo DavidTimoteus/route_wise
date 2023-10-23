@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:route_wise/constans.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
