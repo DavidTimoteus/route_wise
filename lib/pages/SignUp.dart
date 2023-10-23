@@ -35,7 +35,7 @@ class _SignUp extends State<SignUp> {
             children: <Widget>[
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                height: MediaQuery.of(context).size.height - 130,
+                height: MediaQuery.of(context).size.height - 100,
                 width: double.infinity,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,11 +138,22 @@ class _SignUp extends State<SignUp> {
                           style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.w500),
                         ),
-                        Text(
-                          "Login",
-                          style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.bold,
-                              color: const Color.fromRGBO(228, 95, 43, 1)),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Login()));
+                          },
+                          child: Container(
+                            child: Text(
+                              'Login',
+                              style: GoogleFonts.montserrat(
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color.fromRGBO(228, 95, 43,
+                                      1)), // Atur teks menjadi transparan
+                            ),
+                          ),
                         )
                       ],
                     ),
