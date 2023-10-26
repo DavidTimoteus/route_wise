@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'pages/LoginPage.dart';
+import 'package:route_wise/Pages/RekomendasiRute.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(
+        textTheme: GoogleFonts.montserratTextTheme(Theme.of(context).textTheme),
+      ),
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: RekomendasiRute(),
     );
   }
 }
