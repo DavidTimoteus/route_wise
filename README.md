@@ -12,7 +12,7 @@ Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. A
 
 ## Anggota Kelompok
 1) [David Timoteus Arya Bakti Pamungkas](https://github.com/DavidTimoteus)
-2) Ilham Maulana Ahmad
+2) [Ilham Maulana Ahmad](https://github.com/Maulanailham289)
 3) [Moh Iqbal Fatoni](https://github.com/iqbalfatoni10)
 
 ## Pembagian Tugas
