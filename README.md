@@ -9,3 +9,8 @@ Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. A
 4) Kelola Profil
 5) Kelola Permintaan Pasar
 6) Rekomendasi Pemiilihan Rute
+
+### Anggota Kelompok
+1) David Timoteus Arya Bakti Pamungkas
+2) Ilham Maulana Ahmad
+3) Moh Iqbal Fatoni
