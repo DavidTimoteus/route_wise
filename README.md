@@ -18,3 +18,4 @@ Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. A
 ## Pembagian Tugas
 - Welcome Screen, Login, Sign Up (David & Iqbal)
 - Kelola Profile & Sidebar Menu Profile (Ilham)
+- Rekomendasi Rute & Pengelolaan SPK (Iqbal)
