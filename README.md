@@ -16,6 +16,9 @@ Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. A
 3) [Moh Iqbal Fatoni](https://github.com/iqbalfatoni10)
 
 ## Pembagian Tugas
-- Welcome Screen, Login, Sign Up (David & Iqbal)
+- Welcome Screen, Login, Sign Up (David)
 - Kelola Profile & Sidebar Menu Profile (Ilham)
-- Rekomendasi Rute & Pengelolaan SPK (Iqbal)
+- Rekomendasi Rute & Pengelolaan SPK (Iqbal & David)
+- List Permintaan Pasar (Iqbal)
+- Proses Pengiriman (Iqbal)
+- Dashboard Kepala Gudang (David)
