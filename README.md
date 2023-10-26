@@ -1,21 +1,16 @@
-# route_wise
+# flutter_application_1
 
-Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. Aplikasi ini dibangun dengan bahasa Dart dan Framework Flutter, yang dalam perancangannya terintegrasi dengan ERP Odoo dalam Mata Kuliah Perencanaan Sumber Daya. Tujuan dari aplikasi ini adalah untuk mempermudah dalam proses pengiriman barang (rokok) dikarenakan menyediakan berbagai alternatif rute yang tercepat dalam melakukan pengiriman.
+A new Flutter project.
 
-## Fitur
-1) Dashboard
-2) Login
-3) Sign-Up
-4) Kelola Profil
-5) Kelola Permintaan Pasar
-6) Rekomendasi Pemiilihan Rute
+## Getting Started
 
-## Anggota Kelompok
-1) [David Timoteus Arya Bakti Pamungkas](https://github.com/DavidTimoteus)
-2) Ilham Maulana Ahmad
-3) [Moh Iqbal Fatoni](https://github.com/iqbalfatoni10)
+This project is a starting point for a Flutter application.
 
-## Pembagian Tugas
-- Welcome Screen, Login, Sign Up (David & Iqbal)
-- Kelola Profile & Sidebar Menu Profile (Ilham)
-- Rekomendasi Rute & Pengelolaan SPK (Iqbal)
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
