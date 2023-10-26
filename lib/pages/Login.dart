@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:route_wise/Pages/SignUp.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/pages/WelcomeScreen.dart';
+import 'package:route_wise/Components/text_field.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -146,10 +147,10 @@ class _Login extends State<Login> {
                                 horizontal: 20, vertical: 20),
                             child: Column(
                               children: [
-                                inputFile(
+                                textField(
                                     label: 'Email',
                                     icon: FontAwesomeIcons.solidEnvelope),
-                                inputFile(
+                                textField(
                                     label: 'Password',
                                     icon: FontAwesomeIcons.key)
                               ],
