@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/pages/Login.dart';
+import 'package:route_wise/pages/WelcomeScreen.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -21,7 +22,10 @@ class _SignUp extends State<SignUp> {
           backgroundColor: Colors.white,
           leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const WelcomeScreen()));
             },
             icon: const Icon(
               Icons.arrow_back_ios,
