@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/KelolaProfil.dart';
+import 'package:route_wise/Pages/KelolaProfil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,13 +27,12 @@ class Profil extends StatelessWidget {
             IconButton(
               onPressed: () {
                 Navigator.pop(context);
-                 {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => KelolaProfil()),
-                      );
-               }
+                {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => KelolaProfil()),
+                  );
+                }
               },
               icon: Icon(
                 Icons.settings,
