@@ -23,7 +23,7 @@ class _ListPermintaanState extends State<ListPermintaan> {
             },
             icon: Icon(
               FontAwesomeIcons.circleChevronLeft,
-              color: Color.fromARGB(255, 255, 94, 0),
+              color: Color(0xFFE45F2B),
             ),
           ),
           actions: <Widget>[
@@ -33,14 +33,15 @@ class _ListPermintaanState extends State<ListPermintaan> {
               },
               icon: Icon(
                 FontAwesomeIcons.filter,
-                color: Color.fromARGB(255, 255, 94, 0),
+                color: Color(0xFFE45F2B),
               ),
             ),
           ],
           title: Text("List Permintaan",
               style: GoogleFonts.montserrat(
-                  color: Color.fromARGB(255, 255, 94, 0),
-                  fontWeight: FontWeight.bold)),
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFE45F2B),
+                  fontSize: 23)),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
@@ -60,7 +61,7 @@ class _ListPermintaanState extends State<ListPermintaan> {
                       child: Text(
                         "List By Date",
                         style: GoogleFonts.montserrat(
-                            color: Color.fromARGB(255, 255, 94, 0),
+                            color: Color(0xFFE45F2B),
                             fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -130,22 +131,20 @@ class _ListPermintaanState extends State<ListPermintaan> {
                                       ),
                                       Padding(
                                         padding:
-                                            const EdgeInsets.only(left: 40),
-                                        child: SizedBox(
-                                          height: 30,
-                                          width: 30,
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Color.fromARGB(
-                                                  255, 106, 255, 0),
-                                              minimumSize: Size(69, 20),
+                                            const EdgeInsets.only(left: 39),
+                                        child: ClipOval(
+                                          clipBehavior: Clip.antiAlias,
+                                          child: Container(
+                                            width: 35,
+                                            height: 35,
+                                            color: Color(0xFF198754),
+                                            child: Center(
+                                              child: Icon(
+                                                FontAwesomeIcons.circleCheck,
+                                                size: 20,
+                                                color: Colors.white,
+                                              ),
                                             ),
-                                            onPressed: () {},
-                                            child: Text("",
-                                                style: GoogleFonts.montserrat(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w900,
-                                                )),
                                           ),
                                         ),
                                       ),
@@ -196,22 +195,20 @@ class _ListPermintaanState extends State<ListPermintaan> {
                                           Padding(
                                             padding:
                                                 const EdgeInsets.only(left: 28),
-                                            child: SizedBox(
-                                              height: 30,
-                                              width: 30,
-                                              child: ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.red,
-                                                  minimumSize: Size(69, 20),
+                                            child: ClipOval(
+                                              clipBehavior: Clip.antiAlias,
+                                              child: Container(
+                                                width: 35,
+                                                height: 35,
+                                                color: Color(0xFFDC3545),
+                                                child: Center(
+                                                  child: Icon(
+                                                    FontAwesomeIcons
+                                                        .circleXmark,
+                                                    size: 20,
+                                                    color: Colors.white,
+                                                  ),
                                                 ),
-                                                onPressed: () {},
-                                                child: Text("",
-                                                    style:
-                                                        GoogleFonts.montserrat(
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w900,
-                                                    )),
                                               ),
                                             ),
                                           ),
