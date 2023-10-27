@@ -179,6 +179,10 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+      sha256: e595b98692943b4881b219f0a9e3945118d3c16bd7e2813f98ec6e532d905f72
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   path_provider_foundation:
     dependency: transitive
     description:
