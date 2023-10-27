@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:route_wise/Pages/RekomendasiRute.dart';
+import 'package:route_wise/Pages/PengirimanBarang.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
         textTheme: GoogleFonts.montserratTextTheme(Theme.of(context).textTheme),
       ),
       debugShowCheckedModeBanner: false,
-      home: RekomendasiRute(),
+      home: PengirimanBarang(),
     );
   }
 }

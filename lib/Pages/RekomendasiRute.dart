@@ -4,10 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 class RekomendasiRute extends StatefulWidget {
   @override
-  _PengelolaanSPKState createState() => _PengelolaanSPKState();
+  _RekomendasiRuteState createState() => _RekomendasiRuteState();
 }
 
-class _PengelolaanSPKState extends State<RekomendasiRute> {
+class _RekomendasiRuteState extends State<RekomendasiRute> {
   String? selectedvalue;
   @override
   Widget build(BuildContext context) {
