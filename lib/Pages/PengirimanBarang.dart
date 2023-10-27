@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:route_wise/Pages/DashboardKepalaGudang.dart';
 
 class PengirimanBarang extends StatefulWidget {
   @override
@@ -19,11 +20,14 @@ class _PengirimanBarangState extends State<PengirimanBarang> {
           backgroundColor: Colors.white,
           leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const DashboardKepalaGudang()));
             },
             icon: Icon(
               FontAwesomeIcons.circleChevronLeft,
-              color: Color.fromARGB(255, 255, 94, 0),
+              color: Color(0xFFE45F2B),
             ),
           ),
           actions: <Widget>[
@@ -33,14 +37,15 @@ class _PengirimanBarangState extends State<PengirimanBarang> {
               },
               icon: Icon(
                 FontAwesomeIcons.filter,
-                color: Color.fromARGB(255, 255, 94, 0),
+                color: Color(0xFFE45F2B),
               ),
             ),
           ],
           title: Text("Pengiriman Barang",
               style: GoogleFonts.montserrat(
-                  color: Color.fromARGB(255, 255, 94, 0),
-                  fontWeight: FontWeight.bold)),
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFE45F2B),
+                  fontSize: 23)),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
@@ -60,7 +65,7 @@ class _PengirimanBarangState extends State<PengirimanBarang> {
                       child: Text(
                         "List By Date",
                         style: GoogleFonts.montserrat(
-                            color: Color.fromARGB(255, 255, 94, 0),
+                            color: Color(0xFFE45F2B),
                             fontWeight: FontWeight.bold),
                       ),
                     ),

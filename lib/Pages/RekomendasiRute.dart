@@ -32,7 +32,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
             ),
           ],
           title: Text("Rekomendasi Rute",
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
                   color: Color.fromARGB(255, 255, 94, 0),
                   fontWeight: FontWeight.bold)),
           centerTitle: true,
@@ -84,7 +84,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
                                 underline: SizedBox(),
                                 isExpanded: true,
                                 items: [
-                                  "Toko Arudam",
+                                  "Toko Alfa Duro",
                                   "Toko Barokah",
                                   "Toko Sejahtera",
                                   "Toko Makmur",

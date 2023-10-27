@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:route_wise/Pages/DashboardKepalaGudang.dart';
+import 'package:route_wise/Pages/ListPermintaan.dart';
+import 'package:route_wise/Pages/PengirimanBarang.dart';
 
 class MyBottomNavBar extends StatefulWidget {
   const MyBottomNavBar({super.key});
@@ -11,8 +13,10 @@ class MyBottomNavBar extends StatefulWidget {
 
 class _MyBottomNavBar extends State<MyBottomNavBar> {
   int myCurrentIndex = 0;
-  List pages = const [
+  List pages = [
     DashboardKepalaGudang(),
+    ListPermintaan(),
+    PengirimanBarang(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -33,7 +37,9 @@ class _MyBottomNavBar extends State<MyBottomNavBar> {
               unselectedItemColor: Colors.black87,
               currentIndex: myCurrentIndex,
               onTap: (index) {
-                myCurrentIndex = index;
+                setState(() {
+                  myCurrentIndex = index;
+                });
               },
               items: [
                 BottomNavigationBarItem(
