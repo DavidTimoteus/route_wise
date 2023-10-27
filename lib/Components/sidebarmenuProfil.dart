@@ -18,7 +18,6 @@ class MyDrawer extends StatefulWidget {
 class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
-    bool isProfilSelected = false;
     return Drawer(
       backgroundColor: Colors.white,
       child: ListView(
@@ -58,8 +57,7 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pop(context);
               setState(() {
-                isProfilSelected =
-                    true; // Set `isProfilSelected` ke `true` saat Profil dipilih
+// Set `isProfilSelected` ke `true` saat Profil dipilih
               });
             },
           ),
@@ -72,8 +70,7 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pop(context);
               setState(() {
-                isProfilSelected =
-                    true; // Set `isProfilSelected` ke `true` saat Profil dipilih
+// Set `isProfilSelected` ke `true` saat Profil dipilih
               });
             },
           ),
@@ -86,8 +83,7 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pop(context);
               setState(() {
-                isProfilSelected =
-                    true; // Set `isProfilSelected` ke `true` saat Profil dipilih
+// Set `isProfilSelected` ke `true` saat Profil dipilih
               });
             },
           ),
@@ -100,8 +96,7 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pop(context);
               setState(() {
-                isProfilSelected =
-                    true; // Set `isProfilSelected` ke `true` saat Profil dipilih
+// Set `isProfilSelected` ke `true` saat Profil dipilih
               });
             },
           ),
