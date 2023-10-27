@@ -9,6 +9,7 @@ Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. A
 4) Kelola Profil
 5) Kelola Permintaan Pasar
 6) Rekomendasi Pemiilihan Rute
+7) Pengelolaan SPK
 
 ## Anggota Kelompok
 1) [David Timoteus Arya Bakti Pamungkas](https://github.com/DavidTimoteus)
