@@ -8,7 +8,7 @@ class profil_kpl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My App'),
+        title: Text('Profil 3 Sekawan'),
       ),
       body: Center(
         child: Text('PT Sekawan Mulya'),
@@ -48,7 +48,7 @@ class _MyDrawerState extends State<MyDrawer> {
                               child: Image.asset(
                                 "asset/images/DB Route.png",
                                 fit: BoxFit
-                                    .cover, // Jika diperlukan, atur sesuai kebutuhan Anda
+                                    .cover,
                               ),
                             ),
                     ),
@@ -94,7 +94,6 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
-            tileColor: Color.fromARGB(139, 246, 196, 60),
             leading: Icon(Icons.settings),
             title: Text('Settings',style: TextStyle(color: Color(0xFFE45F2B)),),
             onTap: () {

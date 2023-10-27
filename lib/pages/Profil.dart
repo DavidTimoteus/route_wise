@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/KelolaProfil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -26,6 +27,13 @@ class Profil extends StatelessWidget {
             IconButton(
               onPressed: () {
                 Navigator.pop(context);
+                 {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => KelolaProfil()),
+                      );
+               }
               },
               icon: Icon(
                 Icons.settings,
@@ -55,12 +63,12 @@ class Profil extends StatelessWidget {
                 height: 10,
               ),
               Text(
-                "Moh. Iqbal Fatoni",
+                "Ilham Maulana Ahmad",
                 style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold, fontSize: 20),
               ),
               Text(
-                "mohiqbalfatoni10@gmail.com",
+                "Maulana@gmail.com",
                 style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold, fontSize: 10),
               ),
@@ -79,11 +87,11 @@ class Profil extends StatelessWidget {
                   children: [
                     inputFile(
                         label: 'Full Name',
-                        teks: 'Moh. Iqbal Fatoni',
+                        teks: 'Ilham Maulana Ahmad',
                         icon: FontAwesomeIcons.solidCircleUser),
                     inputFile(
                         label: 'E-mail',
-                        teks: 'mohiqbalfatoni10@gmail.com',
+                        teks: 'Maulana@gmail.com',
                         icon: FontAwesomeIcons.solidEnvelope),
                     inputFile(
                         label: 'Password',
@@ -92,7 +100,7 @@ class Profil extends StatelessWidget {
                         icon: FontAwesomeIcons.key),
                     inputFile(
                         label: 'Phone Number',
-                        teks: '085345687219',
+                        teks: '081352673477',
                         icon: FontAwesomeIcons.phone),
                   ],
                 ),

@@ -29,9 +29,12 @@ class _KelolaProfilState extends State<KelolaProfil> {
             IconButton(
               onPressed: () {
                 Navigator.pop(context);
+                
+             
+
               },
               icon: Icon(
-                Icons.settings,
+                FontAwesomeIcons.rightFromBracket,
                 color: Color.fromARGB(255, 255, 94, 0),
               ),
             ),
@@ -52,18 +55,18 @@ class _KelolaProfilState extends State<KelolaProfil> {
               ),
               CircleAvatar(
                 radius: 50.0,
-                backgroundImage: AssetImage('assets/images/hero.jpg'),
+                backgroundImage: AssetImage('asset/images/Profile.jpg'),
               ),
               SizedBox(
                 height: 10,
               ),
               Text(
-                "Moh. Iqbal Fatoni",
+                "Ilham Maulana Ahmad",
                 style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold, fontSize: 20),
               ),
               Text(
-                "mohiqbalfatoni10@gmail.com",
+                "Maulana@gmail.com",
                 style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold, fontSize: 10),
               ),
@@ -82,11 +85,11 @@ class _KelolaProfilState extends State<KelolaProfil> {
                   children: [
                     inputFile(
                         label: 'Full Name',
-                        teks: 'Moh. Iqbal Fatoni',
+                        teks: 'Ilham Maulana Ahmad',
                         icon: FontAwesomeIcons.solidCircleUser),
                     inputFile(
                         label: 'E-mail',
-                        teks: 'mohiqbalfatoni10@gmail.com',
+                        teks: 'Maulana@gmail.com',
                         icon: FontAwesomeIcons.solidEnvelope),
                     inputFile(
                         label: 'Password',
@@ -95,7 +98,7 @@ class _KelolaProfilState extends State<KelolaProfil> {
                         icon: FontAwesomeIcons.key),
                     inputFile(
                         label: 'Phone Number',
-                        teks: '085345687219',
+                        teks: '081352673477',
                         icon: FontAwesomeIcons.phone),
                   ],
                 ),
@@ -105,15 +108,15 @@ class _KelolaProfilState extends State<KelolaProfil> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Container(
                     width: 400,
-                    height: 40,
+                    height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 106, 255, 0),
+                        backgroundColor: Color(0xFFA0E548),
                       ),
                       onPressed: () {},
                       child: Text("SAVE",
                           style: GoogleFonts.montserrat(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                     )),
               )
             ],
