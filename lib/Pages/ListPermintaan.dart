@@ -132,8 +132,9 @@ class _ListPermintaanState extends State<ListPermintaan> {
                                       Padding(
                                         padding:
                                             const EdgeInsets.only(left: 39),
-                                        child: ClipOval(
-                                          clipBehavior: Clip.antiAlias,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
                                           child: Container(
                                             width: 35,
                                             height: 35,
@@ -195,8 +196,9 @@ class _ListPermintaanState extends State<ListPermintaan> {
                                           Padding(
                                             padding:
                                                 const EdgeInsets.only(left: 28),
-                                            child: ClipOval(
-                                              clipBehavior: Clip.antiAlias,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
                                               child: Container(
                                                 width: 35,
                                                 height: 35,
