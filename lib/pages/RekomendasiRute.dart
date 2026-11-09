@@ -7,10 +7,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:route_wise/Components/text_field.dart';
 import 'package:route_wise/models/route_models.dart';
 import 'package:route_wise/services/app_state.dart';
 import 'package:route_wise/services/spk_calculator.dart';
+import 'package:route_wise/theme/app_theme.dart';
 
 class RekomendasiRute extends StatefulWidget {
   const RekomendasiRute({super.key});
@@ -20,8 +20,8 @@ class RekomendasiRute extends StatefulWidget {
 }
 
 class _RekomendasiRuteState extends State<RekomendasiRute> {
-  static const double _defaultWarehouseLat = -7.0051;
-  static const double _defaultWarehouseLng = 113.8626;
+  static const double _defaultWarehouseLat = -7.983908;
+  static const double _defaultWarehouseLng = 112.621391;
 
   double _latitude = _defaultWarehouseLat;
   double _longitude = _defaultWarehouseLng;
@@ -32,6 +32,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
   final TextEditingController _agentController = TextEditingController();
   String _searchFilter = '';
   Set<Polyline> _polylines = const {};
+  String? _selectedStoreName;
 
   @override
   void initState() {
@@ -59,12 +60,15 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
         _longitude = position.longitude;
       });
     } catch (_) {
-      // Fall back to default Sumenep warehouse coordinates when running on
-      // an emulator or desktop target without location services.
+      // Fallback to default Malang hub
     }
   }
 
   Future<void> _fetchOsrmRoute(SpkAlternative target) async {
+    setState(() {
+      _selectedStoreName = target.storeName;
+    });
+
     final url = Uri.parse(
       'https://router.project-osrm.org/route/v1/driving/'
       '$_longitude,$_latitude;${target.longitude},${target.latitude}'
@@ -92,7 +96,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
               _polylines = {
                 Polyline(
                   polylineId: const PolylineId('optimal_route'),
-                  color: const Color(0xFFE45F2B),
+                  color: AppColors.primary,
                   width: 4,
                   points: points,
                 ),
@@ -103,7 +107,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
         }
       }
     } catch (_) {
-      // Fall back to direct line if offline.
+      // Fall back to direct line
     }
 
     if (!mounted) return;
@@ -111,7 +115,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
       _polylines = {
         Polyline(
           polylineId: const PolylineId('direct_route'),
-          color: const Color(0xFFE45F2B),
+          color: AppColors.primary,
           width: 4,
           points: [
             LatLng(_latitude, _longitude),
@@ -126,25 +130,28 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
     final name = _agentController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan nama agen terlebih dahulu.')),
+        const SnackBar(content: Text('Masukkan nama agen/toko.')),
       );
       return;
     }
 
     AppStateScope.of(context).upsertSpkAlternative(
       storeName: name,
-      distanceKm: 3.0,
-      itemCount: 250,
-      estimatedCostRp: 50000,
-      travelTimeMinutes: 15,
-      destination: 'Jl Trunojoyo No 212',
+      distanceKm: 3.2,
+      itemCount: 220,
+      estimatedCostRp: 48000,
+      travelTimeMinutes: 16,
+      destination: 'Jl. Dieng No. 12, Malang',
     );
     _agentController.clear();
     setState(() {
       _searchFilter = '';
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Agen $name ditambahkan ke daftar rute.')),
+      SnackBar(
+        backgroundColor: AppColors.statusGreenAction,
+        content: Text('Toko $name berhasil ditambahkan ke daftar rute.'),
+      ),
     );
   }
 
@@ -156,8 +163,9 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
       _fetchOsrmRoute(alternatives.first);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          backgroundColor: AppColors.ink,
           content: Text(
-            'Rute tercepat: ${alternatives.first.storeName} (${alternatives.first.distanceKm} Km)',
+            'Rute prioritas #1 terpilih: ${alternatives.first.storeName} (${alternatives.first.distanceKm} Km)',
           ),
         ),
       );
@@ -166,6 +174,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = AppTheme.isDesktop(context);
     final appState = AppStateScope.of(context);
     final recommendations = appState.spkAlternatives.where((item) {
       final q = _searchFilter.trim().toLowerCase();
@@ -175,231 +184,413 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
     }).toList();
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: const Color.fromRGBO(255, 252, 225, 1),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color.fromRGBO(255, 252, 225, 1),
-        leading: Container(
-          padding: const EdgeInsets.all(14),
-          child: ClipOval(child: Image.asset('assets/images/hero.jpg')),
+        backgroundColor: AppColors.surface,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(color: AppColors.border, height: 1),
         ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-            },
-            icon: const Icon(
-              FontAwesomeIcons.filter,
-              color: Color(0xFFE45F2B),
+        title: Text(
+          'PENGAMBILAN KEPUTUSAN RUTE ARMADA',
+          style: GoogleFonts.robotoMono(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: AppColors.ink,
+            letterSpacing: 1.0,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              icon: const Icon(Icons.alt_route_rounded, size: 16),
+              label: Text(
+                'HITUNG RUTE OPTIMAL',
+                style: GoogleFonts.robotoMono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              onPressed: _handleCalculateOptimalRoute,
             ),
           ),
         ],
-        title: Text(
-          'RekomendasiRute',
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFFE45F2B),
-            fontSize: 23,
-          ),
-        ),
-        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            children: <Widget>[
-              inputFile(
-                label: 'NAMA AGENT',
-                icon: FontAwesomeIcons.solidCircleUser,
-                controller: _agentController,
-                filled: true,
-                onChanged: (value) {
-                  setState(() {
-                    _searchFilter = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE45F2B),
+      body: isDesktop
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Left Panel: Map & GPS Hub Info
+                Expanded(
+                  flex: 55,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        right: BorderSide(color: AppColors.border, width: 1),
+                      ),
                     ),
-                    onPressed: _handleAddAgent,
-                    child: const Text(
-                      'Add',
-                      style: TextStyle(color: Colors.white),
+                    child: Column(
+                      children: [
+                        _buildGpsStatusBar(),
+                        Expanded(
+                          child: _buildMap(
+                            key: _mapKey,
+                            alternatives: recommendations,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF198754),
-                    ),
-                    onPressed: _handleCalculateOptimalRoute,
-                    child: const Text(
-                      'Finish',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                ),
+
+                // Right Panel: Dispatch Order & Routes
+                Expanded(
+                  flex: 45,
+                  child: Column(
+                    children: [
+                      _buildAddAgentBar(),
+                      Expanded(
+                        child: _buildRouteList(recommendations),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildMap(key: _mapKey, alternatives: recommendations),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                ),
+              ],
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(
-                      'Pilihan Rekomendasi Rute Terbaik',
-                      style: GoogleFonts.montserrat(
-                        color: const Color(0xFFE45F2B),
-                        fontWeight: FontWeight.bold,
+                  _buildGpsStatusBar(),
+                  const SizedBox(height: 12),
+                  _buildAddAgentBar(),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 260,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: _buildMap(
+                        key: _mapKey,
+                        alternatives: recommendations,
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  _buildRouteList(recommendations),
                 ],
               ),
-              const SizedBox(height: 5),
-              ...recommendations.asMap().entries.map(
-                    (entry) => _buildRecommendationCard(
-                      entry.value,
-                      isTopChoice: entry.key == 0,
-                    ),
-                  ),
+            ),
+    );
+  }
+
+  Widget _buildGpsStatusBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceMuted,
+        border: Border(
+          bottom: BorderSide(color: AppColors.border, width: 1),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                FontAwesomeIcons.locationCrosshairs,
+                size: 14,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'HUB MALANG UTAMA: ${_latitude.toStringAsFixed(4)}, ${_longitude.toStringAsFixed(4)}',
+                style: GoogleFonts.robotoMono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ],
           ),
-        ),
+          StatusStampBadge.approved(label: 'GPS ONLINE'),
+        ],
       ),
     );
   }
 
-  Widget _buildRecommendationCard(
-    SpkAlternative item, {
-    required bool isTopChoice,
-  }) {
-    final bgColor = isTopChoice
-        ? const Color.fromRGBO(210, 255, 215, 1)
-        : const Color.fromRGBO(255, 252, 225, 1);
-
-    final computedDist = SpkCalculator.haversineDistanceKm(
-      _latitude,
-      _longitude,
-      item.latitude,
-      item.longitude,
-    );
-    final displayDist = item.distanceKm > 0 ? item.distanceKm : computedDist;
-
-    return GestureDetector(
-      onTap: () => _fetchOsrmRoute(item),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(6.0),
-          border: Border.all(
-            color: isTopChoice ? const Color(0xFF198754) : Colors.black26,
-          ),
+  Widget _buildAddAgentBar() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          bottom: BorderSide(color: AppColors.border, width: 1),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  item.storeName,
-                  style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _agentController,
+              onChanged: (val) {
+                setState(() {
+                  _searchFilter = val;
+                });
+              },
+              style: GoogleFonts.montserrat(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Cari atau ketik nama toko baru...',
+                hintStyle: GoogleFonts.montserrat(
+                  fontSize: 12,
+                  color: AppColors.inkLight,
+                ),
+                prefixIcon: const Icon(
+                  Icons.storefront_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                filled: true,
+                fillColor: AppColors.surfaceMuted,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
                   ),
                 ),
-                Text(
-                  'Skor SAW: ${item.sawScore.toStringAsFixed(3)}',
-                  style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                    color: const Color(0xFFE45F2B),
-                  ),
-                ),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 3),
-              child: Divider(
-                thickness: 2,
-                color: Colors.black,
               ),
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildColumn('Destination :', item.destination),
-                ),
-                Expanded(
-                  child: _buildColumn('Distance :', '$displayDist Km'),
-                ),
-                Expanded(
-                  child: _buildColumn(
-                    'Request :',
-                    '${item.itemCount} Permintaan',
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildColumn(
-                    'Estimasi Biaya :',
-                    'Rp ${item.estimatedCostRp.toStringAsFixed(0)}',
-                  ),
-                ),
-                Expanded(
-                  child: _buildColumn(
-                    'Waktu Tempuh :',
-                    '${item.travelTimeMinutes.toStringAsFixed(0)} Menit',
-                  ),
-                ),
-                Expanded(
-                  child: _buildColumn(
-                    'Status :',
-                    isTopChoice ? 'Rute Prioritas #1' : 'Rute Alternatif',
-                  ),
-                ),
-              ],
+            onPressed: _handleAddAgent,
+            child: Text(
+              '+ TAMBAH',
+              style: GoogleFonts.robotoMono(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildColumn(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+  Widget _buildRouteList(List<SpkAlternative> alternatives) {
+    if (alternatives.isEmpty) {
+      return Center(
+        child: Text(
+          'Tidak ada alternatif rute.',
+          style: GoogleFonts.montserrat(color: AppColors.inkMuted),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(14),
+      itemCount: alternatives.length,
+      itemBuilder: (context, index) {
+        final item = alternatives[index];
+        final isTop = index == 0;
+        final isSelected = item.storeName == _selectedStoreName;
+
+        final computedDist = SpkCalculator.haversineDistanceKm(
+          _latitude,
+          _longitude,
+          item.latitude,
+          item.longitude,
+        );
+        final displayDist = item.distanceKm > 0 ? item.distanceKm : computedDist;
+
+        return InkWell(
+          onTap: () => _fetchOsrmRoute(item),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary
+                    : isTop
+                        ? AppColors.statusGreenBorder
+                        : AppColors.border,
+                width: isSelected || isTop ? 1.5 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isTop
+                        ? AppColors.statusGreenBg
+                        : AppColors.surfaceMuted,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(7),
+                      topRight: Radius.circular(7),
+                    ),
+                    border: const Border(
+                      bottom: BorderSide(color: AppColors.border, width: 1),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isTop
+                                  ? AppColors.statusGreenAction
+                                  : AppColors.ink,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Text(
+                              'STOP #${index + 1}',
+                              style: GoogleFonts.robotoMono(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            item.storeName,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Skor SAW: ${item.sawScore.toStringAsFixed(3)}',
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isTop
+                              ? AppColors.statusGreenText
+                              : AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'JARAK GUDANG',
+                              value: displayDist.toStringAsFixed(2),
+                              unit: 'Km',
+                            ),
+                          ),
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'WAKTU TEMPUH',
+                              value: item.travelTimeMinutes.toStringAsFixed(0),
+                              unit: 'Menit',
+                            ),
+                          ),
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'BIAYA OPERASIONAL',
+                              value: 'Rp ${item.estimatedCostRp.toStringAsFixed(0)}',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      const DashedRule(),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.pin_drop_outlined,
+                                size: 13,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                item.destination,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 11,
+                                  color: AppColors.inkMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            'Kapasitas: ${item.itemCount} Pack',
+                            style: GoogleFonts.robotoMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.inkMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: GoogleFonts.montserrat(fontSize: 10),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -411,7 +602,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
       Marker(
         markerId: const MarkerId('currentLocation'),
         position: LatLng(_latitude, _longitude),
-        infoWindow: const InfoWindow(title: 'Gudang Utama / Lokasi Saat Ini'),
+        infoWindow: const InfoWindow(title: 'Gudang Kebonsari (Hub Utama)'),
       ),
       ...alternatives.map(
         (item) => Marker(
@@ -419,31 +610,28 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
           position: LatLng(item.latitude, item.longitude),
           infoWindow: InfoWindow(
             title: item.storeName,
-            snippet: '${item.distanceKm} Km - Skor ${item.sawScore}',
+            snippet: '${item.distanceKm} Km • Skor ${item.sawScore}',
           ),
         ),
       ),
     };
 
-    return SizedBox(
+    return GoogleMap(
       key: key,
-      height: 220,
-      child: GoogleMap(
-        onMapCreated: (GoogleMapController controller) {
-          if (!_mapCreated) {
-            _controller.complete(controller);
-            setState(() {
-              _mapCreated = true;
-            });
-          }
-        },
-        initialCameraPosition: CameraPosition(
-          target: LatLng(_latitude, _longitude),
-          zoom: 14.0,
-        ),
-        markers: markers,
-        polylines: _polylines,
+      onMapCreated: (GoogleMapController controller) {
+        if (!_mapCreated) {
+          _controller.complete(controller);
+          setState(() {
+            _mapCreated = true;
+          });
+        }
+      },
+      initialCameraPosition: CameraPosition(
+        target: LatLng(_latitude, _longitude),
+        zoom: 13.5,
       ),
+      markers: markers,
+      polylines: _polylines,
     );
   }
 }

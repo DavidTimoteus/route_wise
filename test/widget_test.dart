@@ -5,30 +5,23 @@ import 'package:route_wise/models/route_models.dart';
 import 'package:route_wise/services/spk_calculator.dart';
 
 void main() {
-  testWidgets('WelcomeScreen renders LOGIN and SIGN UP actions',
+  testWidgets('WelcomeScreen renders login and signup actions',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    expect(find.text('LOGIN'), findsOneWidget);
-    expect(find.text('SIGN UP'), findsOneWidget);
-    expect(
-      find.text(
-        "Maximize your fleet's productivity with our optimized route selection!",
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('MASUK KE SISTEM'), findsOneWidget);
+    expect(find.text('DAFTAR AKUN BARU'), findsOneWidget);
   });
 
-  testWidgets('Tapping LOGIN navigates to Login screen',
+  testWidgets('Tapping MASUK KE SISTEM navigates to Login screen',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    await tester.tap(find.text('LOGIN'));
+    await tester.tap(find.text('MASUK KE SISTEM'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Email'), findsOneWidget);
-    expect(find.text('Password'), findsOneWidget);
-    expect(find.text('Remember Me'), findsOneWidget);
+    expect(find.text('Autentikasi Personel'), findsOneWidget);
+    expect(find.text('Ingat sesi'), findsOneWidget);
   });
 
   test('SpkCalculator ranks alternatives accurately using SAW method', () {

@@ -3,8 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/sidebarmenuProfil.dart';
 import 'package:route_wise/pages/Profil.dart';
-import 'package:route_wise/pages/WelcomeScreen.dart';
 import 'package:route_wise/services/app_state.dart';
+import 'package:route_wise/theme/app_theme.dart';
 
 class DashboardKepalaGudang extends StatefulWidget {
   const DashboardKepalaGudang({super.key});
@@ -14,300 +14,539 @@ class DashboardKepalaGudang extends StatefulWidget {
 }
 
 class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
+  bool _isSyncing = false;
+
+  void _triggerOdooSync() async {
+    setState(() {
+      _isSyncing = true;
+    });
+    final appState = AppStateScope.of(context);
+    final count = await appState.syncWithOdoo();
+    if (!mounted) return;
+    setState(() {
+      _isSyncing = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppColors.ink,
+        content: Row(
+          children: [
+            const Icon(Icons.sync_alt, color: AppColors.amberStamp, size: 18),
+            const SizedBox(width: 10),
+            Text(
+              'Sinkronisasi Odoo ERP Berhasil ($count pesanan termutakhirkan)',
+              style: GoogleFonts.montserrat(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = AppStateScope.of(context);
     final user = appState.currentUser;
-    final firstName = user.fullName.split(' ').first;
+    final isDesktop = AppTheme.isDesktop(context);
+
+    // Calculate metrics
+    final totalRequests = appState.requests.length;
+    final inTransitCount = appState.deliveries
+        .where((d) => d.status == DeliveryStatus.onProgress)
+        .length;
+    final deliveredCount = appState.deliveries
+        .where((d) => d.status == DeliveryStatus.success)
+        .length;
+    final bestScore = appState.spkAlternatives.isNotEmpty
+        ? appState.spkAlternatives.first.sawScore.toStringAsFixed(3)
+        : '0.892';
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white,
-      drawer: const MyDrawer(),
+      backgroundColor: AppColors.canvas,
+      drawer: isDesktop ? null : const MyDrawer(),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Profil()),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/ProfilAdmin.jpg',
-                fit: BoxFit.cover,
+        backgroundColor: AppColors.surface,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(color: AppColors.border, height: 1),
+        ),
+        leading: isDesktop
+            ? null
+            : Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu_rounded, color: AppColors.ink),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+        title: Row(
+          children: [
+            Text(
+              'PAPAN KENDALI GUDANG',
+              style: GoogleFonts.robotoMono(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: AppColors.primary),
+              ),
+              child: Text(
+                'LIVE HUB',
+                style: GoogleFonts.robotoMono(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // Odoo ERP Sync Button
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.ink,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.sync_rounded,
+                    size: 16, color: AppColors.primary),
+            label: Text(
+              _isSyncing ? 'Menyinkronkan...' : 'SYNC ODOO',
+              style: GoogleFonts.robotoMono(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+                letterSpacing: 0.8,
+              ),
+            ),
+            onPressed: _isSyncing ? null : _triggerOdooSync,
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Profil()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: AppColors.surfaceMuted,
+                backgroundImage: AssetImage(user.avatarAsset),
               ),
             ),
           ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const WelcomeScreen(),
-                ),
-                (route) => false,
-              );
-            },
-            icon: const Icon(
-              FontAwesomeIcons.rightFromBracket,
-              color: Color(0xFFE45F2B),
-            ),
-          ),
         ],
-        title: Text(
-          'Dashboard',
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFFE45F2B),
-            fontSize: 23,
-          ),
-        ),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: RichText(
-                  text: TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: 'Hi ! $firstName, Here...\n',
-                        style: GoogleFonts.montserrat(
-                          color: const Color(0xFFE45F2B),
-                          fontSize: 18,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1160),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Personnel Welcome & Hub Status
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border, width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Icon(
+                          FontAwesomeIcons.warehouse,
+                          color: AppColors.primary,
+                          size: 20,
                         ),
                       ),
-                      TextSpan(
-                        text: 'Delivery Activity :',
-                        style: GoogleFonts.montserrat(
-                          color: const Color(0xFFE45F2B),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 24,
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Gudang Kebonsari Hub • Distribusi Malang',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Personel Aktif: ${user.fullName} (${user.roleLabel}) • Sesi Terverifikasi Odoo ERP',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 12,
+                                color: AppColors.inkMuted,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      if (isDesktop)
+                        StatusStampBadge.approved(label: 'SISTEM NORMAL'),
                     ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildCounterBadge(
-                      icon: FontAwesomeIcons.chartColumn,
-                      label: 'Request List',
-                      count: appState.requests.length.toString(),
-                    ),
-                    _buildCounterBadge(
-                      icon: FontAwesomeIcons.truck,
-                      label: 'Delivery process',
-                      count: appState.deliveries.length.toString(),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Best Selling',
-                  style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26,
-                    color: const Color(0xFFE45F2B),
+                const SizedBox(height: 16),
+
+                // Operational Ledger Strip (4 Metrics in unified tabular layout)
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border, width: 1),
                   ),
+                  child: isDesktop
+                      ? Row(
+                          children: [
+                            Expanded(
+                              child: _buildMetricCell(
+                                label: 'Permintaan Masuk',
+                                count: totalRequests.toString(),
+                                code: 'REQ-IN',
+                                icon: FontAwesomeIcons.fileLines,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const _VerticalDivider(),
+                            Expanded(
+                              child: _buildMetricCell(
+                                label: 'Sedang Dikirim',
+                                count: inTransitCount.toString(),
+                                code: 'DSP-ACT',
+                                icon: FontAwesomeIcons.truckFast,
+                                color: AppColors.amberText,
+                              ),
+                            ),
+                            const _VerticalDivider(),
+                            Expanded(
+                              child: _buildMetricCell(
+                                label: 'Selesai Terkirim',
+                                count: deliveredCount.toString(),
+                                code: 'DSP-DONE',
+                                icon: FontAwesomeIcons.circleCheck,
+                                color: AppColors.statusGreenAction,
+                              ),
+                            ),
+                            const _VerticalDivider(),
+                            Expanded(
+                              child: _buildMetricCell(
+                                label: 'Skor Optimal SAW',
+                                count: bestScore,
+                                code: 'OPT-SAW',
+                                icon: FontAwesomeIcons.sliders,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildMetricCell(
+                                    label: 'Permintaan',
+                                    count: totalRequests.toString(),
+                                    code: 'REQ',
+                                    icon: FontAwesomeIcons.fileLines,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                const _VerticalDivider(),
+                                Expanded(
+                                  child: _buildMetricCell(
+                                    label: 'Proses Kirim',
+                                    count: inTransitCount.toString(),
+                                    code: 'IN-TRANSIT',
+                                    icon: FontAwesomeIcons.truckFast,
+                                    color: AppColors.amberText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(color: AppColors.border, height: 1),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildMetricCell(
+                                    label: 'Terkirim',
+                                    count: deliveredCount.toString(),
+                                    code: 'DONE',
+                                    icon: FontAwesomeIcons.circleCheck,
+                                    color: AppColors.statusGreenAction,
+                                  ),
+                                ),
+                                const _VerticalDivider(),
+                                Expanded(
+                                  child: _buildMetricCell(
+                                    label: 'Skor SAW',
+                                    count: bestScore,
+                                    code: 'SAW',
+                                    icon: FontAwesomeIcons.sliders,
+                                    color: AppColors.ink,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                 ),
-              ),
-              _buildInfoCard(
-                imageAsset: 'assets/images/DjavaOcha.jpg',
-                cardTitle: 'Product Information',
-                rows: const [
-                  MapEntry('Brand', 'Djava Ocha'),
-                  MapEntry('Tar', '24,8 Mg'),
-                  MapEntry('Nikotin', '1,3 Mg'),
-                  MapEntry('Category', 'SKT'),
-                  MapEntry('Launch Date', '30-03-2023'),
-                  MapEntry('Total Sales', '1.420 Pack'),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Top Agent',
-                  style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26,
-                    color: const Color(0xFFE45F2B),
+                const SizedBox(height: 20),
+
+                // Responsive Section: Product & Agent Cards (Side-by-Side on Web, Stacked on Mobile)
+                if (isDesktop)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildProductLedgerCard(),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildAgentLedgerCard(),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    children: [
+                      _buildProductLedgerCard(),
+                      const SizedBox(height: 16),
+                      _buildAgentLedgerCard(),
+                    ],
                   ),
-                ),
-              ),
-              _buildInfoCard(
-                imageAsset: 'assets/images/AlfaDuro.png',
-                cardTitle: 'Agent Information',
-                rows: const [
-                  MapEntry('Name', 'Alfa Duro'),
-                  MapEntry('Order Total', '6.000.000'),
-                  MapEntry('Join Date', '30-03-2020'),
-                  MapEntry('Best Selling', 'Djava Ocha'),
-                  MapEntry('Address', 'Jl Trunojoyo 212'),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCounterBadge({
-    required IconData icon,
+  Widget _buildMetricCell({
     required String label,
     required String count,
+    required String code,
+    required IconData icon,
+    required Color color,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ClipOval(
-          child: Container(
-            width: 50,
-            height: 50,
-            color: const Color(0xFFF6C445),
-            child: Center(
-              child: Icon(
-                icon,
-                size: 26,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        RichText(
-          textAlign: TextAlign.left,
-          text: TextSpan(
-            children: <TextSpan>[
-              TextSpan(
-                text: '$label\n',
-                style: GoogleFonts.montserrat(
-                  fontSize: 14,
-                  color: const Color(0xFFF6C445),
-                  fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                code,
+                style: GoogleFonts.robotoMono(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.inkMuted,
+                  letterSpacing: 0.8,
                 ),
               ),
-              TextSpan(
-                text: count,
-                style: GoogleFonts.montserrat(
-                  fontSize: 28,
-                  color: const Color(0xFFF6C445),
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              Icon(icon, size: 14, color: color),
             ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoCard({
-    required String imageAsset,
-    required String cardTitle,
-    required List<MapEntry<String, String>> rows,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0xFFF6C445),
-            offset: Offset(5.0, 5.0),
-            blurRadius: 2.0,
-            spreadRadius: 1.0,
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: GoogleFonts.montserrat(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: color,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.inkMuted,
+            ),
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildProductLedgerCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Card(
-            elevation: 1,
-            shadowColor: Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Container(
-              height: 155,
-              width: 130,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  fit: BoxFit.fill,
-                  image: AssetImage(imageAsset),
-                ),
+          // Header Strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceMuted,
+              border: Border(
+                bottom: BorderSide(color: AppColors.border, width: 1),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  cardTitle,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    color: const Color(0xFFE45F2B),
-                    fontWeight: FontWeight.w800,
+                Row(
+                  children: [
+                    const Icon(Icons.star_rounded,
+                        size: 16, color: AppColors.amberStamp),
+                    const SizedBox(width: 8),
+                    Text(
+                      'PRODUK TERLARIS BULAN INI',
+                      style: GoogleFonts.robotoMono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Text(
+                    'SKU-DO-24',
+                    style: GoogleFonts.robotoMono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
-                const Divider(
-                  color: Color(0xFFE45F2B),
-                  thickness: 2,
-                ),
-                ...rows.map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1.5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 95,
-                          child: Text(
-                            '${entry.key} :',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 12,
-                              color: const Color(0xFFE45F2B),
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            entry.value,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 12,
-                              color: const Color(0xFFE45F2B),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image Container
+                Container(
+                  width: 110,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/images/DjavaOcha.jpg',
+                      fit: BoxFit.cover,
                     ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Product Data Table
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Djava Ocha',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      Text(
+                        'Kategori: Minuman Teh Herbal SKT',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 11,
+                          color: AppColors.inkMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const DashedRule(),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Total Terjual',
+                              value: '1.420',
+                              unit: 'Pack',
+                            ),
+                          ),
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Rilis Produk',
+                              value: '30-03-2023',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Kadar Tar',
+                              value: '24.8',
+                              unit: 'Mg',
+                            ),
+                          ),
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Nikotin',
+                              value: '1.3',
+                              unit: 'Mg',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -315,6 +554,168 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAgentLedgerCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header Strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceMuted,
+              border: Border(
+                bottom: BorderSide(color: AppColors.border, width: 1),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.workspace_premium,
+                        size: 16, color: AppColors.amberText),
+                    const SizedBox(width: 8),
+                    Text(
+                      'AGEN DISTRIBUSI TERBAIK',
+                      style: GoogleFonts.robotoMono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Text(
+                    'AGEN-MLG-01',
+                    style: GoogleFonts.robotoMono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Agent Logo / Image
+                Container(
+                  width: 110,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/images/AlfaDuro.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Agent Specs
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Toko Alfa Duro',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      Text(
+                        'Jl. Trunojoyo No. 212, Malang',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 11,
+                          color: AppColors.inkMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const DashedRule(),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Akumulasi Order',
+                              value: 'Rp 6.000.000',
+                            ),
+                          ),
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Terdaftar Sejak',
+                              value: '30-03-2020',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Item Favorit',
+                              value: 'Djava Ocha',
+                            ),
+                          ),
+                          Expanded(
+                            child: LedgerDataCell(
+                              label: 'Status Agen',
+                              value: 'Prioritas A',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VerticalDivider extends StatelessWidget {
+  const _VerticalDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 70,
+      color: AppColors.border,
     );
   }
 }
