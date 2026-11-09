@@ -10,6 +10,7 @@ import 'package:route_wise/pages/RekomendasiRute.dart';
 import 'package:route_wise/pages/SignUp.dart';
 import 'package:route_wise/pages/WelcomeScreen.dart';
 import 'package:route_wise/services/app_state.dart';
+import 'package:route_wise/theme/app_theme.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,6 +38,7 @@ class _MyAppState extends State<MyApp> {
       notifier: _appState,
       child: MaterialApp(
         title: 'RouteWise',
+        theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
         home: const WelcomeScreen(),
         routes: {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:route_wise/theme/app_theme.dart';
 
 Widget textField({
   required String label,
@@ -14,17 +15,18 @@ Widget textField({
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
-      const SizedBox(height: 5),
+      const SizedBox(height: 6),
       if (label.isNotEmpty) ...[
         Text(
-          label,
-          style: GoogleFonts.montserrat(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
+          label.toUpperCase(),
+          style: GoogleFonts.robotoMono(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppColors.inkMuted,
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 6),
       ],
       TextField(
         controller: controller,
@@ -32,19 +34,37 @@ Widget textField({
         keyboardType: keyboardType,
         onChanged: onChanged,
         readOnly: readOnly,
+        style: GoogleFonts.montserrat(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
         decoration: InputDecoration(
           hintText: hintText,
+          hintStyle: GoogleFonts.montserrat(
+            fontSize: 13,
+            color: AppColors.inkLight,
+          ),
           prefixIcon: Icon(
             icon,
-            color: Colors.black87,
+            size: 18,
+            color: AppColors.primary,
           ),
+          filled: true,
+          fillColor: AppColors.surface,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black87),
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: AppColors.border, width: 1),
           ),
-          border: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black87),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: AppColors.border, width: 1),
           ),
         ),
       ),
@@ -63,24 +83,25 @@ Widget inputFile({
   bool readOnly = false,
   bool filled = false,
   Color? fillColor,
-  Color labelColor = Colors.black,
-  Color iconColor = const Color.fromARGB(255, 255, 203, 59),
+  Color labelColor = AppColors.ink,
+  Color iconColor = AppColors.primary,
   VoidCallback? onPrefixTap,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
       if (label.isNotEmpty) ...[
-        const SizedBox(height: 15),
+        const SizedBox(height: 12),
         Text(
-          label,
-          style: GoogleFonts.montserrat(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: labelColor,
+          label.toUpperCase(),
+          style: GoogleFonts.robotoMono(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: labelColor == Colors.black ? AppColors.inkMuted : labelColor,
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 6),
       ],
       TextField(
         controller: controller,
@@ -88,28 +109,41 @@ Widget inputFile({
         keyboardType: keyboardType,
         onChanged: onChanged,
         readOnly: readOnly,
+        style: GoogleFonts.montserrat(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
         decoration: InputDecoration(
           hintText: teks,
-          filled: filled,
-          fillColor: fillColor ?? const Color.fromRGBO(255, 252, 225, 1),
+          hintStyle: GoogleFonts.montserrat(
+            fontSize: 13,
+            color: AppColors.inkLight,
+          ),
+          filled: filled || fillColor != null,
+          fillColor: fillColor ?? AppColors.surface,
           prefixIcon: onPrefixTap != null
               ? IconButton(
-                  icon: Icon(icon, color: iconColor),
+                  icon: Icon(icon, size: 18, color: iconColor),
                   onPressed: onPrefixTap,
                 )
-              : Icon(icon, color: iconColor),
+              : Icon(icon, size: 18, color: iconColor),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Color.fromARGB(255, 255, 203, 59),
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(
+              color: AppColors.primary,
+              width: 1.5,
             ),
           ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black87),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: AppColors.border, width: 1),
           ),
-          border: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black87),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: AppColors.border, width: 1),
           ),
         ),
       ),
