@@ -73,7 +73,7 @@ class AppTheme {
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -206,12 +206,7 @@ class StatusStampBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(4),
-        border: Border.override(
-          top: BorderSide(color: borderColor, width: 1),
-          bottom: BorderSide(color: borderColor, width: 1),
-          left: BorderSide(color: borderColor, width: 1),
-          right: BorderSide(color: borderColor, width: 1),
-        ),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

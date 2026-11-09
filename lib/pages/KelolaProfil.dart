@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/text_field.dart';
 import 'package:route_wise/pages/WelcomeScreen.dart';
@@ -159,20 +158,20 @@ class _KelolaProfilState extends State<KelolaProfil> {
 
                   textField(
                     label: 'Nama Lengkap Personel',
-                    icon: FontAwesomeIcons.solidCircleUser,
+                    icon: Icons.person_rounded,
                     controller: _nameController,
                   ),
                   const SizedBox(height: 12),
                   textField(
                     label: 'Email Operasional',
-                    icon: FontAwesomeIcons.solidEnvelope,
+                    icon: Icons.email_rounded,
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 12),
                   textField(
                     label: 'Perbarui Kata Sandi',
-                    icon: FontAwesomeIcons.key,
+                    icon: Icons.vpn_key_rounded,
                     controller: _passwordController,
                     obscureText: true,
                     hintText: 'Kosongkan bila tidak ingin mengubah sandi',
@@ -180,7 +179,7 @@ class _KelolaProfilState extends State<KelolaProfil> {
                   const SizedBox(height: 12),
                   textField(
                     label: 'Nomor WhatsApp / Kontak',
-                    icon: FontAwesomeIcons.phone,
+                    icon: Icons.phone_rounded,
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                   ),

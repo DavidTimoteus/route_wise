@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/bottom_nav_bar.dart';
 import 'package:route_wise/Components/text_field.dart';
@@ -173,14 +172,14 @@ class _SignUpState extends State<SignUp> {
 
                   textField(
                     label: 'Nama Lengkap',
-                    icon: FontAwesomeIcons.solidCircleUser,
+                    icon: Icons.person_rounded,
                     controller: _fullNameController,
                     hintText: 'Contoh: Ahmad Maulana',
                   ),
                   const SizedBox(height: 12),
                   textField(
                     label: 'Email Operasional',
-                    icon: FontAwesomeIcons.solidEnvelope,
+                    icon: Icons.email_rounded,
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     hintText: 'ahmad@routewise.id',
@@ -189,14 +188,14 @@ class _SignUpState extends State<SignUp> {
                   textField(
                     label: 'Kata Sandi',
                     obscureText: true,
-                    icon: FontAwesomeIcons.key,
+                    icon: Icons.vpn_key_rounded,
                     controller: _passwordController,
                     hintText: 'Minimal 6 karakter',
                   ),
                   const SizedBox(height: 12),
                   textField(
                     label: 'Nomor WhatsApp / Telepon',
-                    icon: FontAwesomeIcons.phone,
+                    icon: Icons.phone_rounded,
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     hintText: '08123456789',
@@ -231,8 +230,9 @@ class _SignUpState extends State<SignUp> {
                   const DashedRule(),
                   const SizedBox(height: 16),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         'Sudah memiliki akun? ',

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/text_field.dart';
 import 'package:route_wise/models/route_models.dart';
@@ -234,7 +233,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
               children: [
                 Row(
                   children: [
-                    const Icon(FontAwesomeIcons.sliders,
+                    const Icon(Icons.tune_rounded,
                         size: 13, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Text(
@@ -382,7 +381,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
                         child: Row(
                           children: [
                             const Icon(
-                              FontAwesomeIcons.shop,
+                              Icons.storefront_rounded,
                               size: 14,
                               color: AppColors.primary,
                             ),
@@ -407,7 +406,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
 
           textField(
             label: 'C1: Jarak Tempuh (Km) • [Cost]',
-            icon: FontAwesomeIcons.road,
+            icon: Icons.add_road_rounded,
             controller: _distanceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             hintText: 'Contoh: 2.8',
@@ -415,7 +414,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
           const SizedBox(height: 12),
           textField(
             label: 'C2: Banyak Barang (Pack) • [Benefit]',
-            icon: FontAwesomeIcons.cube,
+            icon: Icons.inventory_2_rounded,
             controller: _itemsController,
             keyboardType: TextInputType.number,
             hintText: 'Contoh: 220',
@@ -423,7 +422,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
           const SizedBox(height: 12),
           textField(
             label: 'C3: Estimasi Biaya (Rp) • [Cost]',
-            icon: FontAwesomeIcons.coins,
+            icon: Icons.monetization_on_rounded,
             controller: _costController,
             keyboardType: TextInputType.number,
             hintText: 'Contoh: 45000',
@@ -431,7 +430,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
           const SizedBox(height: 12),
           textField(
             label: 'C4: Waktu Tempuh (Menit) • [Cost]',
-            icon: FontAwesomeIcons.hourglassHalf,
+            icon: Icons.hourglass_empty_rounded,
             controller: _timeController,
             keyboardType: TextInputType.number,
             hintText: 'Contoh: 15',
@@ -488,7 +487,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
               children: [
                 Row(
                   children: [
-                    const Icon(FontAwesomeIcons.rankingStar,
+                    const Icon(Icons.leaderboard_rounded,
                         size: 14, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Text(

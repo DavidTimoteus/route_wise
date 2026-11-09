@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/sidebarmenuProfil.dart';
+import 'package:route_wise/models/route_models.dart';
 import 'package:route_wise/pages/Profil.dart';
 import 'package:route_wise/services/app_state.dart';
 import 'package:route_wise/theme/app_theme.dart';
@@ -183,7 +183,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                           border: Border.all(color: AppColors.border),
                         ),
                         child: const Icon(
-                          FontAwesomeIcons.warehouse,
+                          Icons.warehouse_rounded,
                           color: AppColors.primary,
                           size: 20,
                         ),
@@ -234,7 +234,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                 label: 'Permintaan Masuk',
                                 count: totalRequests.toString(),
                                 code: 'REQ-IN',
-                                icon: FontAwesomeIcons.fileLines,
+                                icon: Icons.description_rounded,
                                 color: AppColors.primary,
                               ),
                             ),
@@ -244,7 +244,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                 label: 'Sedang Dikirim',
                                 count: inTransitCount.toString(),
                                 code: 'DSP-ACT',
-                                icon: FontAwesomeIcons.truckFast,
+                                icon: Icons.local_shipping_rounded,
                                 color: AppColors.amberText,
                               ),
                             ),
@@ -254,7 +254,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                 label: 'Selesai Terkirim',
                                 count: deliveredCount.toString(),
                                 code: 'DSP-DONE',
-                                icon: FontAwesomeIcons.circleCheck,
+                                icon: Icons.check_circle_rounded,
                                 color: AppColors.statusGreenAction,
                               ),
                             ),
@@ -264,7 +264,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                 label: 'Skor Optimal SAW',
                                 count: bestScore,
                                 code: 'OPT-SAW',
-                                icon: FontAwesomeIcons.sliders,
+                                icon: Icons.tune_rounded,
                                 color: AppColors.ink,
                               ),
                             ),
@@ -279,7 +279,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                     label: 'Permintaan',
                                     count: totalRequests.toString(),
                                     code: 'REQ',
-                                    icon: FontAwesomeIcons.fileLines,
+                                    icon: Icons.description_rounded,
                                     color: AppColors.primary,
                                   ),
                                 ),
@@ -289,7 +289,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                     label: 'Proses Kirim',
                                     count: inTransitCount.toString(),
                                     code: 'IN-TRANSIT',
-                                    icon: FontAwesomeIcons.truckFast,
+                                    icon: Icons.local_shipping_rounded,
                                     color: AppColors.amberText,
                                   ),
                                 ),
@@ -303,7 +303,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                     label: 'Terkirim',
                                     count: deliveredCount.toString(),
                                     code: 'DONE',
-                                    icon: FontAwesomeIcons.circleCheck,
+                                    icon: Icons.check_circle_rounded,
                                     color: AppColors.statusGreenAction,
                                   ),
                                 ),
@@ -313,7 +313,7 @@ class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
                                     label: 'Skor SAW',
                                     count: bestScore,
                                     code: 'SAW',
-                                    icon: FontAwesomeIcons.sliders,
+                                    icon: Icons.tune_rounded,
                                     color: AppColors.ink,
                                   ),
                                 ),

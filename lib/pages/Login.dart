@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/bottom_nav_bar.dart';
 import 'package:route_wise/Components/text_field.dart';
@@ -17,10 +16,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool _isRememberMeChecked = false;
-  final TextEditingController _emailController =
-      TextEditingController(text: 'david@routewise.id');
-  final TextEditingController _passwordController =
-      TextEditingController(text: 'password123');
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   UserRole _selectedRole = UserRole.kepalaGudang;
 
   @override
@@ -33,13 +30,6 @@ class _LoginState extends State<Login> {
   void _handleRoleSwitch(UserRole role) {
     setState(() {
       _selectedRole = role;
-      if (role == UserRole.kepalaGudang) {
-        _emailController.text = 'david@routewise.id';
-      } else if (role == UserRole.driver) {
-        _emailController.text = 'budi.driver@routewise.id';
-      } else {
-        _emailController.text = 'admin.spk@routewise.id';
-      }
     });
   }
 
@@ -115,7 +105,7 @@ class _LoginState extends State<Login> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Icon(
-                              FontAwesomeIcons.route,
+                              Icons.route_rounded,
                               color: Colors.white,
                               size: 14,
                             ),
@@ -192,17 +182,17 @@ class _LoginState extends State<Login> {
                       _buildRoleChip(
                         role: UserRole.kepalaGudang,
                         label: 'Kepala Gudang',
-                        icon: FontAwesomeIcons.warehouse,
+                        icon: Icons.warehouse_rounded,
                       ),
                       _buildRoleChip(
                         role: UserRole.driver,
                         label: 'Driver Ekspedisi',
-                        icon: FontAwesomeIcons.truckFast,
+                        icon: Icons.local_shipping_rounded,
                       ),
                       _buildRoleChip(
                         role: UserRole.admin,
                         label: 'Admin SPK',
-                        icon: FontAwesomeIcons.sliders,
+                        icon: Icons.tune_rounded,
                       ),
                     ],
                   ),
@@ -210,7 +200,7 @@ class _LoginState extends State<Login> {
 
                   textField(
                     label: 'Email Operasional',
-                    icon: FontAwesomeIcons.solidEnvelope,
+                    icon: Icons.email_rounded,
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     hintText: 'nama@routewise.id',
@@ -219,14 +209,15 @@ class _LoginState extends State<Login> {
                   textField(
                     label: 'Kata Sandi',
                     obscureText: true,
-                    icon: FontAwesomeIcons.key,
+                    icon: Icons.vpn_key_rounded,
                     controller: _passwordController,
                     hintText: 'Masukkan kata sandi',
                   ),
                   const SizedBox(height: 14),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       InkWell(
                         onTap: () {
@@ -235,6 +226,7 @@ class _LoginState extends State<Login> {
                           });
                         },
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox(
                               height: 20,
@@ -315,8 +307,9 @@ class _LoginState extends State<Login> {
                   const DashedRule(),
                   const SizedBox(height: 16),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         'Belum memiliki akses? ',

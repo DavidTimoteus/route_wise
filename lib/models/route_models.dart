@@ -37,6 +37,9 @@ class UserAccount {
     this.avatarAsset = 'assets/images/Profile.jpg',
   });
 
+  String get roleLabel => role.label;
+  String get occupation => role.label;
+
   UserAccount copyWith({
     String? fullName,
     String? email,

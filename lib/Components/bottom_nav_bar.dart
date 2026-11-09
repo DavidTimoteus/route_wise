@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/models/route_models.dart';
 import 'package:route_wise/pages/DashboardKepalaGudang.dart';
@@ -24,6 +23,7 @@ class MyBottomNavBar extends StatefulWidget {
 class _MyBottomNavBarState extends State<MyBottomNavBar> {
   int myCurrentIndex = 0;
   bool _initializedFromRole = false;
+  bool _forceMobileView = false;
 
   final List<Widget> pages = const [
     DashboardKepalaGudang(),
@@ -35,27 +35,27 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
 
   static const List<_NavItem> _navItems = [
     _NavItem(
-      icon: FontAwesomeIcons.chartLine,
+      icon: Icons.analytics_rounded,
       label: 'Dashboard',
       code: 'MON-01',
     ),
     _NavItem(
-      icon: FontAwesomeIcons.fileLines,
+      icon: Icons.description_rounded,
       label: 'Permintaan',
       code: 'REQ-02',
     ),
     _NavItem(
-      icon: FontAwesomeIcons.truckFast,
+      icon: Icons.local_shipping_rounded,
       label: 'Pengiriman',
       code: 'DSP-03',
     ),
     _NavItem(
-      icon: FontAwesomeIcons.mapLocationDot,
+      icon: Icons.map_rounded,
       label: 'Rute GPS',
       code: 'MAP-04',
     ),
     _NavItem(
-      icon: FontAwesomeIcons.sliders,
+      icon: Icons.tune_rounded,
       label: 'SPK SAW',
       code: 'SPK-05',
     ),
@@ -85,6 +85,89 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
   Widget build(BuildContext context) {
     final isDesktop = AppTheme.isDesktop(context);
     final user = AppStateScope.of(context).currentUser;
+
+    // When forced to simulate mobile on desktop screen
+    if (isDesktop && _forceMobileView) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFE4DFD6),
+        body: Stack(
+          children: [
+            Center(
+              child: Container(
+                width: 380,
+                height: 760,
+                margin: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.canvas,
+                  borderRadius: BorderRadius.circular(36),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.25),
+                      blurRadius: 35,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                  border: Border.all(color: const Color(0xFF2D2420), width: 8),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Column(
+                    children: [
+                      // Phone Top Speaker Bar
+                      Container(
+                        height: 24,
+                        color: const Color(0xFF2D2420),
+                        child: Center(
+                          child: Container(
+                            width: 60,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF473B35),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(child: _buildMobileScaffold()),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Floating Switcher Back to Desktop
+            Positioned(
+              top: 20,
+              right: 20,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.ink,
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.laptop_chromebook_rounded, size: 18),
+                label: Text(
+                  'KEMBALI KE MODE DESKTOP',
+                  style: GoogleFonts.robotoMono(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _forceMobileView = false;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (isDesktop) {
       return Scaffold(
@@ -124,7 +207,7 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: const Icon(
-                                FontAwesomeIcons.route,
+                                Icons.route_rounded,
                                 color: Colors.white,
                                 size: 18,
                               ),
@@ -274,6 +357,35 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
                     ),
                   ),
 
+                  // Viewport Mode Switcher (Simulasi Mobile)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      icon: const Icon(Icons.smartphone_rounded, size: 16),
+                      label: Text(
+                        'LIHAT TAMPILAN HP',
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _forceMobileView = true;
+                        });
+                      },
+                    ),
+                  ),
+
                   // Bottom Utilities
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -348,7 +460,11 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
       );
     }
 
-    // Mobile Navigation Shell
+    // Default Mobile View (< 768px)
+    return _buildMobileScaffold();
+  }
+
+  Widget _buildMobileScaffold() {
     return Scaffold(
       body: pages[myCurrentIndex],
       bottomNavigationBar: Container(
@@ -384,28 +500,28 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
               },
               items: const [
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.chartLine, size: 18),
-                  activeIcon: Icon(FontAwesomeIcons.chartLine, size: 19),
+                  icon: Icon(Icons.analytics_rounded, size: 18),
+                  activeIcon: Icon(Icons.analytics_rounded, size: 19),
                   label: 'Dashboard',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.fileLines, size: 18),
-                  activeIcon: Icon(FontAwesomeIcons.fileLines, size: 19),
+                  icon: Icon(Icons.description_rounded, size: 18),
+                  activeIcon: Icon(Icons.description_rounded, size: 19),
                   label: 'Permintaan',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.truckFast, size: 18),
-                  activeIcon: Icon(FontAwesomeIcons.truckFast, size: 19),
+                  icon: Icon(Icons.local_shipping_rounded, size: 18),
+                  activeIcon: Icon(Icons.local_shipping_rounded, size: 19),
                   label: 'Pengiriman',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.mapLocationDot, size: 18),
-                  activeIcon: Icon(FontAwesomeIcons.mapLocationDot, size: 19),
+                  icon: Icon(Icons.map_rounded, size: 18),
+                  activeIcon: Icon(Icons.map_rounded, size: 19),
                   label: 'Rute',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.sliders, size: 18),
-                  activeIcon: Icon(FontAwesomeIcons.sliders, size: 19),
+                  icon: Icon(Icons.tune_rounded, size: 18),
+                  activeIcon: Icon(Icons.tune_rounded, size: 19),
                   label: 'SPK',
                 ),
               ],

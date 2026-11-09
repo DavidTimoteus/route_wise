@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -33,6 +33,8 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
   String _searchFilter = '';
   Set<Polyline> _polylines = const {};
   String? _selectedStoreName;
+  bool _useGoogleMapOnWeb = false;
+  double _mapZoomScale = 1.0;
 
   @override
   void initState() {
@@ -310,7 +312,7 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
           Row(
             children: [
               const Icon(
-                FontAwesomeIcons.locationCrosshairs,
+                Icons.my_location_rounded,
                 size: 14,
                 color: AppColors.primary,
               ),
@@ -598,6 +600,10 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
     required Key key,
     required List<SpkAlternative> alternatives,
   }) {
+    if (kIsWeb && !_useGoogleMapOnWeb) {
+      return _buildInteractiveVectorMap(alternatives);
+    }
+
     final markers = <Marker>{
       Marker(
         markerId: const MarkerId('currentLocation'),
@@ -616,22 +622,426 @@ class _RekomendasiRuteState extends State<RekomendasiRute> {
       ),
     };
 
-    return GoogleMap(
-      key: key,
-      onMapCreated: (GoogleMapController controller) {
-        if (!_mapCreated) {
-          _controller.complete(controller);
-          setState(() {
-            _mapCreated = true;
-          });
-        }
-      },
-      initialCameraPosition: CameraPosition(
-        target: LatLng(_latitude, _longitude),
-        zoom: 13.5,
+    return Stack(
+      children: [
+        GoogleMap(
+          key: key,
+          onMapCreated: (GoogleMapController controller) {
+            if (!_mapCreated) {
+              _controller.complete(controller);
+              setState(() {
+                _mapCreated = true;
+              });
+            }
+          },
+          initialCameraPosition: CameraPosition(
+            target: LatLng(_latitude, _longitude),
+            zoom: 13.5,
+          ),
+          markers: markers,
+          polylines: _polylines,
+        ),
+        if (kIsWeb)
+          Positioned(
+            top: 10,
+            right: 10,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.ink,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              ),
+              icon: const Icon(Icons.map_rounded, size: 14),
+              label: const Text('Beralih ke Peta Vektor GPS',
+                  style: TextStyle(fontSize: 10)),
+              onPressed: () {
+                setState(() {
+                  _useGoogleMapOnWeb = false;
+                });
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildInteractiveVectorMap(List<SpkAlternative> alternatives) {
+    final selectedAlt = alternatives.firstWhere(
+      (a) => a.storeName == _selectedStoreName,
+      orElse: () =>
+          alternatives.isNotEmpty ? alternatives.first : const SpkAlternative(
+        id: '0',
+        storeName: 'Pilih Toko',
+        destination: '-',
+        distanceKm: 0,
+        itemCount: 0,
+        estimatedCostRp: 0,
+        travelTimeMinutes: 0,
       ),
-      markers: markers,
-      polylines: _polylines,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEBE5D8),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Stack(
+        children: [
+          // Background Road Grid Pattern
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _MapCanvasPainter(
+                hubLat: _latitude,
+                hubLng: _longitude,
+                alternatives: alternatives,
+                selectedStore: _selectedStoreName ?? (alternatives.isNotEmpty ? alternatives.first.storeName : null),
+                zoomScale: _mapZoomScale,
+              ),
+            ),
+          ),
+
+          // Top Info Status Bar
+          Positioned(
+            top: 12,
+            left: 12,
+            right: 12,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.statusGreenAction,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'PETA GPS DISPATCH • OSRM ROUTE ACTIVE',
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.92),
+                    foregroundColor: AppColors.ink,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    side: const BorderSide(color: AppColors.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  icon: const Icon(Icons.language_rounded, size: 13, color: AppColors.primary),
+                  label: Text(
+                    'Mode Google Maps SDK',
+                    style: GoogleFonts.robotoMono(fontSize: 9, fontWeight: FontWeight.w700),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _useGoogleMapOnWeb = true;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Interactive Store Pins Click Targets
+          Positioned.fill(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final w = constraints.maxWidth;
+                final h = constraints.maxHeight;
+                final hubX = w * 0.45;
+                final hubY = h * 0.55;
+
+                return Stack(
+                  children: [
+                    // Hub Marker
+                    Positioned(
+                      left: hubX - 20,
+                      top: hubY - 32,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.ink,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'HUB KEBONSARI',
+                              style: GoogleFonts.robotoMono(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.location_on, size: 28, color: AppColors.primary),
+                        ],
+                      ),
+                    ),
+
+                    // Destination Pins
+                    ...alternatives.asMap().entries.map((entry) {
+                      final idx = entry.key;
+                      final alt = entry.value;
+                      final isSelected = alt.storeName == _selectedStoreName ||
+                          (_selectedStoreName == null && idx == 0);
+
+                      // Normalized visual offset based on relative coordinates
+                      final dLat = (alt.latitude - _latitude) * 4500 * _mapZoomScale;
+                      final dLng = (alt.longitude - _longitude) * 4500 * _mapZoomScale;
+                      final posX = (hubX + dLng).clamp(20.0, w - 120.0);
+                      final posY = (hubY - dLat).clamp(40.0, h - 60.0);
+
+                      return Positioned(
+                        left: posX,
+                        top: posY,
+                        child: GestureDetector(
+                          onTap: () {
+                            _fetchOsrmRoute(alt);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppColors.statusGreenAction : Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: isSelected ? AppColors.statusGreenBorder : AppColors.border,
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.12),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  '#${idx + 1} ${alt.storeName}',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                    color: isSelected ? Colors.white : AppColors.ink,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.pin_drop,
+                                size: isSelected ? 26 : 22,
+                                color: isSelected ? AppColors.statusGreenAction : AppColors.inkMuted,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                );
+              },
+            ),
+          ),
+
+          // Bottom Route Details Badge
+          Positioned(
+            bottom: 12,
+            left: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.alt_route_rounded, size: 16, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Rute Aktif: ${selectedAlt.storeName} (${selectedAlt.distanceKm} Km • ${selectedAlt.travelTimeMinutes.toStringAsFixed(0)} Mnt)',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Zoom Controls (+ / - / Reset)
+          Positioned(
+            bottom: 12,
+            right: 12,
+            child: Column(
+              children: [
+                _buildZoomBtn(
+                  icon: Icons.add,
+                  onTap: () {
+                    setState(() {
+                      if (_mapZoomScale < 2.2) _mapZoomScale += 0.2;
+                    });
+                  },
+                ),
+                const SizedBox(height: 4),
+                _buildZoomBtn(
+                  icon: Icons.remove,
+                  onTap: () {
+                    setState(() {
+                      if (_mapZoomScale > 0.6) _mapZoomScale -= 0.2;
+                    });
+                  },
+                ),
+                const SizedBox(height: 4),
+                _buildZoomBtn(
+                  icon: Icons.my_location,
+                  onTap: () {
+                    setState(() {
+                      _mapZoomScale = 1.0;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildZoomBtn({required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Icon(icon, size: 16, color: AppColors.ink),
+      ),
     );
   }
 }
+
+class _MapCanvasPainter extends CustomPainter {
+  final double hubLat;
+  final double hubLng;
+  final List<SpkAlternative> alternatives;
+  final String? selectedStore;
+  final double zoomScale;
+
+  _MapCanvasPainter({
+    required this.hubLat,
+    required this.hubLng,
+    required this.alternatives,
+    required this.selectedStore,
+    required this.zoomScale,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final gridPaint = Paint()
+      ..color = const Color(0xFFDDD6C8)
+      ..strokeWidth = 1.0;
+
+    final roadPaint = Paint()
+      ..color = const Color(0xFFD3CABE)
+      ..strokeWidth = 2.5;
+
+    // Grid lines
+    for (double x = 0; x < size.width; x += 40) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
+    }
+    for (double y = 0; y < size.height; y += 40) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    }
+
+    // Arterial road lines (Stylized Malang Roads)
+    canvas.drawLine(Offset(0, size.height * 0.55), Offset(size.width, size.height * 0.55), roadPaint);
+    canvas.drawLine(Offset(size.width * 0.45, 0), Offset(size.width * 0.45, size.height), roadPaint);
+    canvas.drawLine(Offset(0, size.height * 0.25), Offset(size.width, size.height * 0.75), roadPaint);
+
+    final hubX = size.width * 0.45;
+    final hubY = size.height * 0.55;
+
+    // Draw Route Polylines to destinations
+    for (int i = 0; i < alternatives.length; i++) {
+      final alt = alternatives[i];
+      final isSelected = alt.storeName == selectedStore || (selectedStore == null && i == 0);
+
+      final dLat = (alt.latitude - hubLat) * 4500 * zoomScale;
+      final dLng = (alt.longitude - hubLng) * 4500 * zoomScale;
+      final targetX = (hubX + dLng).clamp(20.0, size.width - 120.0);
+      final targetY = (hubY - dLat).clamp(40.0, size.height - 60.0);
+
+      if (isSelected) {
+        // High-contrast primary route
+        final routePaint = Paint()
+          ..color = AppColors.primary
+          ..strokeWidth = 4.0
+          ..strokeCap = StrokeCap.round;
+
+        final path = Path();
+        path.moveTo(hubX, hubY);
+        // Bezier road curve
+        path.quadraticBezierTo(
+          (hubX + targetX) / 2 + 20,
+          (hubY + targetY) / 2 - 15,
+          targetX + 10,
+          targetY + 15,
+        );
+        canvas.drawPath(path, routePaint);
+      } else {
+        // Subtle alternative route line
+        final altRoutePaint = Paint()
+          ..color = const Color(0xFFC7BFAF)
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
+        canvas.drawLine(Offset(hubX, hubY), Offset(targetX + 10, targetY + 15), altRoutePaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MapCanvasPainter oldDelegate) {
+    return oldDelegate.selectedStore != selectedStore ||
+        oldDelegate.zoomScale != zoomScale ||
+        oldDelegate.alternatives.length != alternatives.length;
+  }
+}
+

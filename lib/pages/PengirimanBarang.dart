@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/models/route_models.dart';
 import 'package:route_wise/services/app_state.dart';
@@ -323,7 +322,7 @@ class _PengirimanBarangState extends State<PengirimanBarang> {
                           Row(
                             children: [
                               const Icon(
-                                FontAwesomeIcons.idBadge,
+                                Icons.badge_rounded,
                                 size: 12,
                                 color: AppColors.primary,
                               ),

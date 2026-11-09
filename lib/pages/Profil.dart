@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/models/route_models.dart';
 import 'package:route_wise/pages/KelolaProfil.dart';
@@ -153,19 +152,19 @@ class Profil extends StatelessWidget {
                         child: Column(
                           children: [
                             _buildInfoRow(
-                              icon: FontAwesomeIcons.phone,
+                              icon: Icons.phone_rounded,
                               label: 'Kontak Telepon',
                               value: user.phoneNumber,
                             ),
                             const SizedBox(height: 12),
                             _buildInfoRow(
-                              icon: FontAwesomeIcons.briefcase,
+                              icon: Icons.work_rounded,
                               label: 'Divisi / Jabatan',
                               value: user.occupation,
                             ),
                             const SizedBox(height: 12),
                             _buildInfoRow(
-                              icon: FontAwesomeIcons.buildingColumns,
+                              icon: Icons.account_balance_rounded,
                               label: 'Unit Gudang',
                               value: 'Hub Malang Utama (Gudang Kebonsari)',
                             ),
@@ -205,7 +204,7 @@ class Profil extends StatelessWidget {
                               context: context,
                               role: UserRole.kepalaGudang,
                               label: 'Gudang',
-                              icon: FontAwesomeIcons.warehouse,
+                              icon: Icons.warehouse_rounded,
                               isSelected: user.role == UserRole.kepalaGudang,
                             ),
                           ),
@@ -215,7 +214,7 @@ class Profil extends StatelessWidget {
                               context: context,
                               role: UserRole.driver,
                               label: 'Driver',
-                              icon: FontAwesomeIcons.truckFast,
+                              icon: Icons.local_shipping_rounded,
                               isSelected: user.role == UserRole.driver,
                             ),
                           ),
@@ -225,7 +224,7 @@ class Profil extends StatelessWidget {
                               context: context,
                               role: UserRole.admin,
                               label: 'Admin',
-                              icon: FontAwesomeIcons.sliders,
+                              icon: Icons.tune_rounded,
                               isSelected: user.role == UserRole.admin,
                             ),
                           ),

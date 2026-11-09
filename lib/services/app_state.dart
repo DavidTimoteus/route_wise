@@ -325,29 +325,53 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void switchRole(UserRole role) {
+    _currentUser = _currentUser.copyWith(role: role);
+    notifyListeners();
+  }
+
+  void addMarketRequest({
+    required String agentName,
+    required String product,
+    required int quantityPacks,
+    required String destination,
+  }) {
+    final newReq = MarketRequest(
+      id: 'req-${_requests.length + 1}',
+      product: product,
+      quantityPacks: quantityPacks,
+      destination: destination,
+      agentName: agentName,
+      orderDate: DateTime.now().toString().split('.')[0],
+      status: RequestStatus.pending,
+    );
+    _requests.insert(0, newReq);
+    notifyListeners();
+  }
+
   void recalculateSpkRanking() {
     _spkAlternatives = SpkCalculator.rankBySaw(_spkAlternatives);
     notifyListeners();
   }
 
-  Future<bool> syncWithOdoo(OdooService service) async {
-    final fetchedRequests = await service.fetchMarketRequests();
-    final fetchedDeliveries = await service.fetchDeliveryOrders();
-    if (fetchedRequests.isEmpty && fetchedDeliveries.isEmpty) {
-      return false;
-    }
-    if (fetchedRequests.isNotEmpty) {
-      _requests
-        ..clear()
-        ..addAll(fetchedRequests);
-    }
-    if (fetchedDeliveries.isNotEmpty) {
-      _deliveries
-        ..clear()
-        ..addAll(fetchedDeliveries);
-    }
+  Future<int> syncWithOdoo([OdooService? service]) async {
+    final odoo = service ?? OdooService();
+    try {
+      final fetchedRequests = await odoo.fetchMarketRequests();
+      final fetchedDeliveries = await odoo.fetchDeliveryOrders();
+      if (fetchedRequests.isNotEmpty) {
+        _requests
+          ..clear()
+          ..addAll(fetchedRequests);
+      }
+      if (fetchedDeliveries.isNotEmpty) {
+        _deliveries
+          ..clear()
+          ..addAll(fetchedDeliveries);
+      }
+    } catch (_) {}
     notifyListeners();
-    return true;
+    return _requests.length;
   }
 }
 
