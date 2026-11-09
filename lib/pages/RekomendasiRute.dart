@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 
 class RekomendasiRute extends StatefulWidget {
+  const RekomendasiRute({super.key});
+
   @override
-  _RekomendasiRuteState createState() => _RekomendasiRuteState();
+  State<RekomendasiRute> createState() => _RekomendasiRuteState();
 }
 
 class _RekomendasiRuteState extends State<RekomendasiRute> {
@@ -104,7 +106,7 @@ Row(
                           height: 130,
                           width: 400,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(210, 255, 2153, 1),
+                            color: const Color.fromRGBO(210, 255, 215, 1),
                             borderRadius: BorderRadius.circular(0.0),
                           ),
                         ),

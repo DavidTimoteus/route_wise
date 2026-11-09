@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:route_wise/Pages/DashboardKepalaGudang.dart';
+import 'package:route_wise/pages/DashboardKepalaGudang.dart';
 
 class PengirimanBarang extends StatefulWidget {
+  const PengirimanBarang({super.key});
+
   @override
-  _PengirimanBarangState createState() => _PengirimanBarangState();
+  State<PengirimanBarang> createState() => _PengirimanBarangState();
 }
 
 class _PengirimanBarangState extends State<PengirimanBarang> {
@@ -83,7 +85,7 @@ class _PengirimanBarangState extends State<PengirimanBarang> {
                           height: 130,
                           width: 400,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(210, 255, 2153, 1),
+                            color: const Color.fromRGBO(210, 255, 215, 1),
                             borderRadius: BorderRadius.circular(0.0),
                           ),
                         ),

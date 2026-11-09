@@ -6,12 +6,12 @@ class DashboardKepalaGudang extends StatefulWidget {
   const DashboardKepalaGudang({super.key});
 
   @override
-  State<DashboardKepalaGudang> createState() => _DashboardKepalaGudang();
+  State<DashboardKepalaGudang> createState() => _DashboardKepalaGudangState();
 }
 
-class _DashboardKepalaGudang extends State<DashboardKepalaGudang> {
+class _DashboardKepalaGudangState extends State<DashboardKepalaGudang> {
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,

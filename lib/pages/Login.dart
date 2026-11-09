@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:route_wise/Pages/SignUp.dart';
+import 'package:route_wise/pages/SignUp.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/pages/WelcomeScreen.dart';
 import 'package:route_wise/Components/text_field.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
-  _Login createState() => _Login();
+  State<Login> createState() => _LoginState();
 }
 
-class _Login extends State<Login> {
+class _LoginState extends State<Login> {
   bool? _ischecked = false;
 
   @override

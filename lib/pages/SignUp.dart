@@ -9,10 +9,10 @@ class SignUp extends StatefulWidget {
   const SignUp({super.key});
 
   @override
-  State<SignUp> createState() => _SignUp();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _SignUp extends State<SignUp> {
+class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

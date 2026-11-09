@@ -3,8 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class KelolaProfil extends StatefulWidget {
+  const KelolaProfil({super.key});
+
   @override
-  _KelolaProfilState createState() => _KelolaProfilState();
+  State<KelolaProfil> createState() => _KelolaProfilState();
 }
 
 class _KelolaProfilState extends State<KelolaProfil> {
@@ -53,9 +55,9 @@ class _KelolaProfilState extends State<KelolaProfil> {
               SizedBox(
                 height: 15,
               ),
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 50.0,
-                backgroundImage: AssetImage('asset/images/Profile.jpg'),
+                backgroundImage: AssetImage('assets/images/Profile.jpg'),
               ),
               SizedBox(
                 height: 10,

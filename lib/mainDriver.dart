@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:route_wise/Pages/RekomendasiRute.dart';
+import 'package:route_wise/pages/RekomendasiRute.dart';
 
 void main() {
   runApp(MyApp());

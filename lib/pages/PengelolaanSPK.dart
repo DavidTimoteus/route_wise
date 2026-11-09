@@ -3,8 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PengelolaanSPK extends StatefulWidget {
+  const PengelolaanSPK({super.key});
+
   @override
-  _PengelolaanSPKState createState() => _PengelolaanSPKState();
+  State<PengelolaanSPK> createState() => _PengelolaanSPKState();
 }
 
 class _PengelolaanSPKState extends State<PengelolaanSPK> {

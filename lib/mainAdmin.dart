@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:route_wise/Pages/PengelolaanSPK.dart';
+import 'package:route_wise/pages/PengelolaanSPK.dart';
 
 void main() {
   runApp(MyApp());

@@ -3,8 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ListPermintaan extends StatefulWidget {
+  const ListPermintaan({super.key});
+
   @override
-  _ListPermintaanState createState() => _ListPermintaanState();
+  State<ListPermintaan> createState() => _ListPermintaanState();
 }
 
 class _ListPermintaanState extends State<ListPermintaan> {

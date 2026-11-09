@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:route_wise/Pages/DashboardKepalaGudang.dart';
-import 'package:route_wise/Pages/ListPermintaan.dart';
-import 'package:route_wise/Pages/PengirimanBarang.dart';
+import 'package:route_wise/pages/DashboardKepalaGudang.dart';
+import 'package:route_wise/pages/ListPermintaan.dart';
+import 'package:route_wise/pages/PengirimanBarang.dart';
 
 class MyBottomNavBar extends StatefulWidget {
   const MyBottomNavBar({super.key});
 
   @override
-  State<MyBottomNavBar> createState() => _MyBottomNavBar();
+  State<MyBottomNavBar> createState() => _MyBottomNavBarState();
 }
 
-class _MyBottomNavBar extends State<MyBottomNavBar> {
+class _MyBottomNavBarState extends State<MyBottomNavBar> {
   int myCurrentIndex = 0;
   List pages = [
     DashboardKepalaGudang(),
