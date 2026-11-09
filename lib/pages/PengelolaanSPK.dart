@@ -12,7 +12,7 @@ class PengelolaanSPK extends StatefulWidget {
 }
 
 class _PengelolaanSPKState extends State<PengelolaanSPK> {
-  String? selectedvalue;
+  String? _selectedStore;
   final TextEditingController _distanceController = TextEditingController();
   final TextEditingController _itemsController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
@@ -38,7 +38,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
 
   void _onSelectStore(String? storeName) {
     setState(() {
-      selectedvalue = storeName;
+      _selectedStore = storeName;
     });
     if (storeName == null) return;
 
@@ -59,7 +59,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
   }
 
   void _handleAddAlternative() {
-    final storeName = selectedvalue;
+    final storeName = _selectedStore;
     if (storeName == null || storeName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -177,13 +177,13 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       border: Border.all(
-                        color: selectedvalue == null
+                        color: _selectedStore == null
                             ? Colors.black
                             : const Color.fromARGB(255, 255, 203, 59),
                       ),
                     ),
                     child: DropdownButton<String?>(
-                      value: selectedvalue,
+                      value: _selectedStore,
                       hint: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: Text('Pilih Toko Tujuan'),
@@ -200,7 +200,7 @@ class _PengelolaanSPKState extends State<PengelolaanSPK> {
                                   const SizedBox(width: 7),
                                   Icon(
                                     FontAwesomeIcons.shop,
-                                    color: selectedvalue == null
+                                    color: _selectedStore == null
                                         ? Colors.black
                                         : const Color.fromARGB(
                                             255,

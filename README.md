@@ -1,28 +1,34 @@
-# route_wise
+# RouteWise (`route_wise`)
 
-Apliasi dibangun sebagai pemenuhan tugas akhir Mata Kuliah Pemrograman Mobile. Aplikasi ini dibangun dengan bahasa Dart dan Framework Flutter, yang dalam perancangannya terintegrasi dengan ERP Odoo dalam Mata Kuliah Perencanaan Sumber Daya. Tujuan dari aplikasi ini adalah untuk mempermudah dalam proses pengiriman barang (rokok) dikarenakan menyediakan berbagai alternatif rute yang tercepat dalam melakukan pengiriman.
+Aplikasi mobile berbasis Flutter dan Dart untuk manajemen pengiriman barang terintegrasi ERP Odoo, dilengkapi Sistem Pendukung Keputusan (SPK) metode Simple Additive Weighting (SAW) dan rekomendasi rute pengiriman.
 
-## Fitur
-1) Welcome Screen
-2) Login
-3) Sign-Up
-4) Kelola Profil
-5) Kelola Permintaan Pasar
-6) List Permintaan
-7) Proses Pengiriman
-8) Dashboard
-9) Rekomendasi Pemiilihan Rute
-10) Pengelolaan SPK
+## Fitur Utama
+1. **Welcome Screen, Login & Sign-Up** — Autentikasi pengguna berbasis peran (*Kepala Gudang*, *Driver*, *Admin SPK*).
+2. **Dashboard Kepala Gudang** — Ringkasan aktivitas pengiriman, daftar permintaan, produk terlaris, dan agen utama.
+3. **List Permintaan Pasar** — Pencarian, penyaringan status, serta persetujuan/penolakan permintaan pasar yang terhubung langsung ke jadwal pengiriman.
+4. **Proses Pengiriman Barang** — Pemantauan dan pembaruan status pengiriman (*On Progress* / *Success*).
+5. **Pengelolaan SPK (Metode SAW)** — Perhitungan bobot kriteria (jarak tempuh, jumlah barang, estimasi biaya, waktu tempuh) untuk menentukan prioritas pengiriman.
+6. **Rekomendasi Pemilihan Rute** — Peta interaktif Google Maps dengan kalkulasi rute OSRM dan urutan prioritas SPK.
+7. **Kelola Profil** — Pembaruan informasi akun pengguna.
+8. **Konektor Odoo ERP** — Layanan sinkronisasi JSON-RPC untuk *Sales Order* (`sale.order`) dan *Delivery Order* (`stock.picking`).
+
+## Konfigurasi Lingkungan
+Tambahkan kunci Google Maps API pada berkas `android/local.properties` (berkas ini tidak di-commit ke Git):
+```properties
+MAPS_API_KEY=your_google_maps_api_key_here
+```
+
+Untuk menghubungkan aplikasi ke server Odoo ERP saat dijalankan:
+```bash
+flutter run --dart-define=ODOO_URL=http://localhost:8069 --dart-define=ODOO_DB=routewise_erp
+```
 
 ## Anggota Kelompok
-1) [David Timoteus Arya Bakti Pamungkas](https://github.com/DavidTimoteus)
-2) [Ilham Maulana Ahmad](https://github.com/Maulanailham289)
-3) [Moh Iqbal Fatoni](https://github.com/iqbalfatoni10)
+1. [David Timoteus Arya Bakti Pamungkas](https://github.com/DavidTimoteus)
+2. [Ilham Maulana Ahmad](https://github.com/Maulanailham289)
+3. [Moh Iqbal Fatoni](https://github.com/iqbalfatoni10)
 
 ## Pembagian Tugas
-- Welcome Screen, Login, Sign Up (David)
-- Kelola Profile & Sidebar Menu Profile (Ilham)
-- Rekomendasi Rute & Pengelolaan SPK (Iqbal & David)
-- List Permintaan Pasar (Iqbal)
-- Proses Pengiriman (Iqbal)
-- Dashboard Kepala Gudang (David)
+- Welcome Screen, Login, Sign Up & Dashboard Kepala Gudang (David)
+- Kelola Profil & Sidebar Menu Profil (Ilham)
+- Rekomendasi Rute, Pengelolaan SPK, List Permintaan & Proses Pengiriman (Iqbal & David)
