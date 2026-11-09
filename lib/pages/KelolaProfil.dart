@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:route_wise/Components/text_field.dart';
 import 'package:route_wise/pages/WelcomeScreen.dart';
 import 'package:route_wise/services/app_state.dart';
+import 'package:route_wise/theme/app_theme.dart';
 
 class KelolaProfil extends StatefulWidget {
   const KelolaProfil({super.key});
@@ -48,7 +49,13 @@ class _KelolaProfilState extends State<KelolaProfil> {
       phoneNumber: _phoneController.text,
     );
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profil berhasil diperbarui.')),
+      SnackBar(
+        backgroundColor: AppColors.statusGreenAction,
+        content: Text(
+          'Profil personel berhasil disimpan ke database.',
+          style: GoogleFonts.montserrat(color: Colors.white),
+        ),
+      ),
     );
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
@@ -60,22 +67,26 @@ class _KelolaProfilState extends State<KelolaProfil> {
     final user = AppStateScope.of(context).currentUser;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        backgroundColor: AppColors.canvas,
         elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Color.fromARGB(255, 255, 94, 0),
+        title: Text(
+          'KELOLA DATA PERSONEL',
+          style: GoogleFonts.robotoMono(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+            letterSpacing: 1.0,
           ),
         ),
-        actions: <Widget>[
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.ink),
+        ),
+        actions: [
           IconButton(
+            tooltip: 'Logout',
             onPressed: () {
               Navigator.pushAndRemoveUntil(
                 context,
@@ -86,108 +97,123 @@ class _KelolaProfilState extends State<KelolaProfil> {
               );
             },
             icon: const Icon(
-              FontAwesomeIcons.rightFromBracket,
-              color: Color.fromARGB(255, 255, 94, 0),
+              Icons.logout_rounded,
+              color: AppColors.statusRedText,
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Center(
-              child: Text(
-                'PROFILE',
-                style: GoogleFonts.montserrat(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border, width: 1),
               ),
-            ),
-            const SizedBox(height: 15),
-            const CircleAvatar(
-              radius: 50.0,
-              backgroundImage: AssetImage('assets/images/Profile.jpg'),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              user.fullName,
-              style: GoogleFonts.montserrat(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            Text(
-              user.email,
-              style: GoogleFonts.montserrat(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  inputFile(
-                    label: 'Full Name',
-                    teks: user.fullName,
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 32,
+                        backgroundColor: AppColors.surfaceMuted,
+                        backgroundImage: AssetImage(user.avatarAsset),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.fullName,
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              user.roleLabel.toUpperCase(),
+                              style: GoogleFonts.robotoMono(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                                color: AppColors.primary,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const DashedRule(),
+                  const SizedBox(height: 20),
+
+                  textField(
+                    label: 'Nama Lengkap Personel',
                     icon: FontAwesomeIcons.solidCircleUser,
                     controller: _nameController,
-                    labelColor: Colors.grey,
-                    iconColor: Colors.black,
                   ),
-                  inputFile(
-                    label: 'E-mail',
-                    teks: user.email,
+                  const SizedBox(height: 12),
+                  textField(
+                    label: 'Email Operasional',
                     icon: FontAwesomeIcons.solidEnvelope,
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    labelColor: Colors.grey,
-                    iconColor: Colors.black,
                   ),
-                  inputFile(
-                    label: 'Password',
-                    teks: 'Kosongkan jika tidak diubah',
-                    obscureText: true,
+                  const SizedBox(height: 12),
+                  textField(
+                    label: 'Perbarui Kata Sandi',
                     icon: FontAwesomeIcons.key,
                     controller: _passwordController,
-                    labelColor: Colors.grey,
-                    iconColor: Colors.black,
+                    obscureText: true,
+                    hintText: 'Kosongkan bila tidak ingin mengubah sandi',
                   ),
-                  inputFile(
-                    label: 'Phone Number',
-                    teks: user.phoneNumber,
+                  const SizedBox(height: 12),
+                  textField(
+                    label: 'Nomor WhatsApp / Kontak',
                     icon: FontAwesomeIcons.phone,
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    labelColor: Colors.grey,
-                    iconColor: Colors.black,
+                  ),
+                  const SizedBox(height: 28),
+
+                  // High Contrast Verified Green Action Button (WCAG AA Pass)
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.statusGreenAction,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      onPressed: _saveProfile,
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      label: Text(
+                        'SIMPAN PERUBAHAN DATA',
+                        style: GoogleFonts.robotoMono(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: SizedBox(
-                width: 400,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFA0E548),
-                  ),
-                  onPressed: _saveProfile,
-                  child: Text(
-                    'SAVE',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
