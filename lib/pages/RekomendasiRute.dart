@@ -1,10 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:route_wise/Components/text_field.dart';
+import 'package:route_wise/models/route_models.dart';
+import 'package:route_wise/services/app_state.dart';
+import 'package:route_wise/services/spk_calculator.dart';
 
 class RekomendasiRute extends StatefulWidget {
   const RekomendasiRute({super.key});
@@ -14,651 +20,414 @@ class RekomendasiRute extends StatefulWidget {
 }
 
 class _RekomendasiRuteState extends State<RekomendasiRute> {
-  String? selectedvalue;
-  double? _latitude = 0;
-  double? _longitude = 0;
-  Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
-  GlobalKey _mapKey = GlobalKey();
+  static const double _defaultWarehouseLat = -7.0051;
+  static const double _defaultWarehouseLng = 113.8626;
+
+  double _latitude = _defaultWarehouseLat;
+  double _longitude = _defaultWarehouseLng;
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+  final GlobalKey _mapKey = GlobalKey();
   bool _mapCreated = false;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _agentController = TextEditingController();
+  String _searchFilter = '';
+  Set<Polyline> _polylines = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _initLocation();
+  }
+
+  @override
+  void dispose() {
+    _agentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initLocation() async {
+    try {
+      final status = await Permission.locationWhenInUse.request();
+      if (!status.isGranted) return;
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      if (!mounted) return;
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+    } catch (_) {
+      // Fall back to default Sumenep warehouse coordinates when running on
+      // an emulator or desktop target without location services.
+    }
+  }
+
+  Future<void> _fetchOsrmRoute(SpkAlternative target) async {
+    final url = Uri.parse(
+      'https://router.project-osrm.org/route/v1/driving/'
+      '$_longitude,$_latitude;${target.longitude},${target.latitude}'
+      '?overview=full&geometries=geojson',
+    );
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final routes = decoded['routes'] as List<dynamic>?;
+        if (routes != null && routes.isNotEmpty) {
+          final geometry =
+              routes.first['geometry'] as Map<String, dynamic>? ?? const {};
+          final coords = geometry['coordinates'] as List<dynamic>? ?? const [];
+          final points = coords
+              .map(
+                (pair) => LatLng(
+                  (pair[1] as num).toDouble(),
+                  (pair[0] as num).toDouble(),
+                ),
+              )
+              .toList();
+          if (mounted && points.isNotEmpty) {
+            setState(() {
+              _polylines = {
+                Polyline(
+                  polylineId: const PolylineId('optimal_route'),
+                  color: const Color(0xFFE45F2B),
+                  width: 4,
+                  points: points,
+                ),
+              };
+            });
+            return;
+          }
+        }
+      }
+    } catch (_) {
+      // Fall back to direct line if offline.
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _polylines = {
+        Polyline(
+          polylineId: const PolylineId('direct_route'),
+          color: const Color(0xFFE45F2B),
+          width: 4,
+          points: [
+            LatLng(_latitude, _longitude),
+            LatLng(target.latitude, target.longitude),
+          ],
+        ),
+      };
+    });
+  }
+
+  void _handleAddAgent() {
+    final name = _agentController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Masukkan nama agen terlebih dahulu.')),
+      );
+      return;
+    }
+
+    AppStateScope.of(context).upsertSpkAlternative(
+      storeName: name,
+      distanceKm: 3.0,
+      itemCount: 250,
+      estimatedCostRp: 50000,
+      travelTimeMinutes: 15,
+      destination: 'Jl Trunojoyo No 212',
+    );
+    _agentController.clear();
+    setState(() {
+      _searchFilter = '';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Agen $name ditambahkan ke daftar rute.')),
+    );
+  }
+
+  void _handleCalculateOptimalRoute() {
+    final appState = AppStateScope.of(context);
+    appState.recalculateSpkRanking();
+    final alternatives = appState.spkAlternatives;
+    if (alternatives.isNotEmpty) {
+      _fetchOsrmRoute(alternatives.first);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Rute tercepat: ${alternatives.first.storeName} (${alternatives.first.distanceKm} Km)',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomInset: true,
-        backgroundColor: Color.fromRGBO(255, 252, 225, 1),
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Color.fromRGBO(255, 252, 225, 1),
-          leading: Container(
-              padding: EdgeInsets.all(14),
-              child: ClipOval(child: Image.asset('assets/images/hero.jpg'))),
-          
-          actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(
-                FontAwesomeIcons.filter,
-                color: Color(0xFFE45F2B),
-              ),
-            ),
-          ],
-          title: Text("RekomendasiRute",
-              style: GoogleFonts.montserrat(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFE45F2B),
-                  fontSize: 23)),
-          centerTitle: true,
-        ),
-        body: SingleChildScrollView(
-         child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 40),
-        child: Column(
-          children: <Widget>[
-            inputFile(
-              label: 'NAMA AGENT',
-              icon: FontAwesomeIcons.solidCircleUser,
-            ),
-           SizedBox(height: 20), // Add some space between the input field and buttons
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  children: [
-    ElevatedButton(
-      onPressed: () {
-        // Add functionality for the "Add" button
-      },
-      child: Text('Add'),
-    ),
-    ElevatedButton(
-      onPressed: () {
-        // Add functionality for the "Finish" button
-      },
-      child: Text('Finish'),
-    ),
-  ],
-),
-     _buildMap(key: _mapKey), 
+    final appState = AppStateScope.of(context);
+    final recommendations = appState.spkAlternatives.where((item) {
+      final q = _searchFilter.trim().toLowerCase();
+      return q.isEmpty ||
+          item.storeName.toLowerCase().contains(q) ||
+          item.destination.toLowerCase().contains(q);
+    }).toList();
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start, 
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        "Pilihan Rekomendasi Rute Terbaik",
-                        style: GoogleFonts.montserrat(
-                            color: Color(0xFFE45F2B),
-                            fontWeight: FontWeight.bold),
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color.fromRGBO(255, 252, 225, 1),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: const Color.fromRGBO(255, 252, 225, 1),
+        leading: Container(
+          padding: const EdgeInsets.all(14),
+          child: ClipOval(child: Image.asset('assets/images/hero.jpg')),
+        ),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            },
+            icon: const Icon(
+              FontAwesomeIcons.filter,
+              color: Color(0xFFE45F2B),
+            ),
+          ),
+        ],
+        title: Text(
+          'RekomendasiRute',
+          style: GoogleFonts.montserrat(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFFE45F2B),
+            fontSize: 23,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            children: <Widget>[
+              inputFile(
+                label: 'NAMA AGENT',
+                icon: FontAwesomeIcons.solidCircleUser,
+                controller: _agentController,
+                filled: true,
+                onChanged: (value) {
+                  setState(() {
+                    _searchFilter = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE45F2B),
+                    ),
+                    onPressed: _handleAddAgent,
+                    child: const Text(
+                      'Add',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF198754),
+                    ),
+                    onPressed: _handleCalculateOptimalRoute,
+                    child: const Text(
+                      'Finish',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildMap(key: _mapKey, alternatives: recommendations),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      'Pilihan Rekomendasi Rute Terbaik',
+                      style: GoogleFonts.montserrat(
+                        color: const Color(0xFFE45F2B),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Container(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                          child: Material(
-                        child: Container(
-                          height: 130,
-                          width: 400,
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(210, 255, 215, 1),
-                            borderRadius: BorderRadius.circular(0.0),
-                          ),
-                        ),
-                      )),
-                      Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Arudam Djaya sumenep',
-                                        style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      const Padding(
-                                        padding: EdgeInsets.only(top: 3),
-                                        child: Divider(
-                                          thickness: 2,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Destination :',
-                                        style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 27),
-                                        child: Text(
-                                          'Distance :',
-                                          style: GoogleFonts.montserrat(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 54),
-                                        child: Text(
-                                          'Request :',
-                                          style: GoogleFonts.montserrat(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  // Memberikan jarak antara teks
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Jl Trunojoyo No 212',
-                                        style: GoogleFonts.montserrat(
-                                            fontSize: 10),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 32),
-                                        child: Text(
-                                          '2,5 Km',
-                                          style: GoogleFonts.montserrat(
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 59),
-                                        child: Text(
-                                          '912 Permintaan',
-                                          style: GoogleFonts.montserrat(
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Request :',
-                                            style: GoogleFonts.montserrat(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 27),
-                                            child: Text(
-                                              'Destination :',
-                                              style: GoogleFonts.montserrat(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 55),
-                                            child: Text(
-                                              'Expected Date :',
-                                              style: GoogleFonts.montserrat(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      // Memberikan jarak antara teks
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '200 Pack',
-                                            style: GoogleFonts.montserrat(
-                                                fontSize: 10),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 40),
-                                            child: Text(
-                                              'JL Trunojoyo No 212',
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 10),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 36),
-                                            child: Text(
-                                              '10/22/2023 13:41:05',
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 10),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              ...recommendations.asMap().entries.map(
+                    (entry) => _buildRecommendationCard(
+                      entry.value,
+                      isTopChoice: entry.key == 0,
+                    ),
+                  ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendationCard(
+    SpkAlternative item, {
+    required bool isTopChoice,
+  }) {
+    final bgColor = isTopChoice
+        ? const Color.fromRGBO(210, 255, 215, 1)
+        : const Color.fromRGBO(255, 252, 225, 1);
+
+    final computedDist = SpkCalculator.haversineDistanceKm(
+      _latitude,
+      _longitude,
+      item.latitude,
+      item.longitude,
+    );
+    final displayDist = item.distanceKm > 0 ? item.distanceKm : computedDist;
+
+    return GestureDetector(
+      onTap: () => _fetchOsrmRoute(item),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(6.0),
+          border: Border.all(
+            color: isTopChoice ? const Color(0xFF198754) : Colors.black26,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  item.storeName,
+                  style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                          child: Material(
-                        child: Container(
-                          height: 130,
-                          width: 400,
-                          decoration: BoxDecoration(
-                            color: Color.fromRGBO(255, 252, 225, 1),
-                            borderRadius: BorderRadius.circular(0.0),
-                          ),
-                        ),
-                      )),
-                      Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'On Progress...',
-                                        style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      const Padding(
-                                        padding: EdgeInsets.only(top: 3),
-                                        child: Divider(
-                                          thickness: 2,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Product :',
-                                        style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 27),
-                                        child: Text(
-                                          'Drive Name :',
-                                          style: GoogleFonts.montserrat(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 54),
-                                        child: Text(
-                                          'Order Date :',
-                                          style: GoogleFonts.montserrat(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  // Memberikan jarak antara teks
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Djava Mild',
-                                        style: GoogleFonts.montserrat(
-                                            fontSize: 10),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 32),
-                                        child: Text(
-                                          'Ilham Maulana',
-                                          style: GoogleFonts.montserrat(
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 59),
-                                        child: Text(
-                                          '10/22/2023 13:41:05',
-                                          style: GoogleFonts.montserrat(
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Request :',
-                                            style: GoogleFonts.montserrat(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 27),
-                                            child: Text(
-                                              'Destination :',
-                                              style: GoogleFonts.montserrat(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 55),
-                                            child: Text(
-                                              'Expected Date :',
-                                              style: GoogleFonts.montserrat(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      // Memberikan jarak antara teks
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '200 Pack',
-                                            style: GoogleFonts.montserrat(
-                                                fontSize: 10),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 40),
-                                            child: Text(
-                                              'JL Trunojoyo No 212',
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 10),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 36),
-                                            child: Text(
-                                              '10/22/2023 13:41:05',
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 10),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: 230,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                          child: Material(
-                        child: Container(
-                          height: 130,
-                          width: 400,
-                          decoration: BoxDecoration(
-                            color: Color.fromRGBO(255, 252, 225, 1),
-                            borderRadius: BorderRadius.circular(0.0),
-                          ),
-                        ),
-                      )),
-                      Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'On Progress...',
-                                        style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      const Padding(
-                                        padding: EdgeInsets.only(top: 3),
-                                        child: Divider(
-                                          thickness: 2,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Product :',
-                                        style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 27),
-                                        child: Text(
-                                          'Drive Name :',
-                                          style: GoogleFonts.montserrat(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 54),
-                                        child: Text(
-                                          'Order Date :',
-                                          style: GoogleFonts.montserrat(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  // Memberikan jarak antara teks
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Djava Mild',
-                                        style: GoogleFonts.montserrat(
-                                            fontSize: 10),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 32),
-                                        child: Text(
-                                          'Ilham Maulana',
-                                          style: GoogleFonts.montserrat(
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 59),
-                                        child: Text(
-                                          '10/22/2023 13:41:05',
-                                          style: GoogleFonts.montserrat(
-                                              fontSize: 10),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Request :',
-                                            style: GoogleFonts.montserrat(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 27),
-                                            child: Text(
-                                              'Destination :',
-                                              style: GoogleFonts.montserrat(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 55),
-                                            child: Text(
-                                              'Expected Date :',
-                                              style: GoogleFonts.montserrat(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      // Memberikan jarak antara teks
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '200 Pack',
-                                            style: GoogleFonts.montserrat(
-                                                fontSize: 10),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 40),
-                                            child: Text(
-                                              'JL Trunojoyo No 212',
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 10),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 36),
-                                            child: Text(
-                                              '10/22/2023 13:41:05',
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 10),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                Text(
+                  'Skor SAW: ${item.sawScore.toStringAsFixed(3)}',
+                  style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: const Color(0xFFE45F2B),
                   ),
                 ),
               ],
             ),
-          ),
-        ));
+            const Padding(
+              padding: EdgeInsets.only(top: 3),
+              child: Divider(
+                thickness: 2,
+                color: Colors.black,
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildColumn('Destination :', item.destination),
+                ),
+                Expanded(
+                  child: _buildColumn('Distance :', '$displayDist Km'),
+                ),
+                Expanded(
+                  child: _buildColumn(
+                    'Request :',
+                    '${item.itemCount} Permintaan',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildColumn(
+                    'Estimasi Biaya :',
+                    'Rp ${item.estimatedCostRp.toStringAsFixed(0)}',
+                  ),
+                ),
+                Expanded(
+                  child: _buildColumn(
+                    'Waktu Tempuh :',
+                    '${item.travelTimeMinutes.toStringAsFixed(0)} Menit',
+                  ),
+                ),
+                Expanded(
+                  child: _buildColumn(
+                    'Status :',
+                    isTopChoice ? 'Rute Prioritas #1' : 'Rute Alternatif',
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
-Widget _buildMap({required Key key}) {
-    return Container(
+
+  Widget _buildColumn(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.montserrat(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: GoogleFonts.montserrat(fontSize: 10),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMap({
+    required Key key,
+    required List<SpkAlternative> alternatives,
+  }) {
+    final markers = <Marker>{
+      Marker(
+        markerId: const MarkerId('currentLocation'),
+        position: LatLng(_latitude, _longitude),
+        infoWindow: const InfoWindow(title: 'Gudang Utama / Lokasi Saat Ini'),
+      ),
+      ...alternatives.map(
+        (item) => Marker(
+          markerId: MarkerId(item.id),
+          position: LatLng(item.latitude, item.longitude),
+          infoWindow: InfoWindow(
+            title: item.storeName,
+            snippet: '${item.distanceKm} Km - Skor ${item.sawScore}',
+          ),
+        ),
+      ),
+    };
+
+    return SizedBox(
       key: key,
-      height: 200,
+      height: 220,
       child: GoogleMap(
         onMapCreated: (GoogleMapController controller) {
           if (!_mapCreated) {
@@ -669,52 +438,12 @@ Widget _buildMap({required Key key}) {
           }
         },
         initialCameraPosition: CameraPosition(
-          target: LatLng(_latitude ?? 0, _longitude ?? 0),
-          zoom: 15.0,
+          target: LatLng(_latitude, _longitude),
+          zoom: 14.0,
         ),
-        markers: {
-          Marker(
-            markerId: MarkerId("currentLocation"),
-            position: LatLng(_latitude ?? 0, _longitude ?? 0),
-            infoWindow: InfoWindow(title: "Current Location"),
-          ),
-        },
+        markers: markers,
+        polylines: _polylines,
       ),
     );
   }
-}
-
-Widget inputFile(
-    {required label, teks, obscureText = false, required IconData icon}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Text(
-        label,
-        style: GoogleFonts.montserrat(
-            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
-      ),
-      TextField(
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          hintText: teks,
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Color.fromARGB(
-                  255, 255, 203, 59), // Ganti dengan warna yang Anda inginkan
-            ),
-          ),
-          filled: true, // Aktifkan latar belakang
-          fillColor: Color.fromRGBO(255, 252, 225, 1),
-          prefixIcon: IconButton(
-            icon: Icon(icon, color: Color.fromARGB(255, 255, 203, 59)),
-            onPressed: () {
-              // Di sini Anda dapat mengatur tindakan yang akan diambil saat ikon diklik
-              // Anda dapat mengembalikan argumen atau melakukan tindakan lainnya
-            },
-          ),
-        ),
-      )
-    ],
-  );
 }
