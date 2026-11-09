@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:route_wise/models/route_models.dart';
+import 'package:route_wise/services/odoo_service.dart';
 import 'package:route_wise/services/spk_calculator.dart';
 
 class AppState extends ChangeNotifier {
@@ -327,6 +328,26 @@ class AppState extends ChangeNotifier {
   void recalculateSpkRanking() {
     _spkAlternatives = SpkCalculator.rankBySaw(_spkAlternatives);
     notifyListeners();
+  }
+
+  Future<bool> syncWithOdoo(OdooService service) async {
+    final fetchedRequests = await service.fetchMarketRequests();
+    final fetchedDeliveries = await service.fetchDeliveryOrders();
+    if (fetchedRequests.isEmpty && fetchedDeliveries.isEmpty) {
+      return false;
+    }
+    if (fetchedRequests.isNotEmpty) {
+      _requests
+        ..clear()
+        ..addAll(fetchedRequests);
+    }
+    if (fetchedDeliveries.isNotEmpty) {
+      _deliveries
+        ..clear()
+        ..addAll(fetchedDeliveries);
+    }
+    notifyListeners();
+    return true;
   }
 }
 

@@ -1,30 +1,62 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:route_wise/pages/WelcomeScreen.dart';
+import 'package:route_wise/main.dart';
+import 'package:route_wise/models/route_models.dart';
+import 'package:route_wise/services/spk_calculator.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const WelcomeScreen());
+  testWidgets('WelcomeScreen renders LOGIN and SIGN UP actions',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('LOGIN'), findsOneWidget);
+    expect(find.text('SIGN UP'), findsOneWidget);
+    expect(
+      find.text(
+        "Maximize your fleet's productivity with our optimized route selection!",
+      ),
+      findsOneWidget,
+    );
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('Tapping LOGIN navigates to Login screen',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.tap(find.text('LOGIN'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Remember Me'), findsOneWidget);
+  });
+
+  test('SpkCalculator ranks alternatives accurately using SAW method', () {
+    const candidates = [
+      SpkAlternative(
+        id: '1',
+        storeName: 'Toko Jauh Mahal',
+        destination: 'Lokasi A',
+        distanceKm: 10.0,
+        itemCount: 100,
+        estimatedCostRp: 100000,
+        travelTimeMinutes: 45,
+      ),
+      SpkAlternative(
+        id: '2',
+        storeName: 'Toko Dekat Banyak Permintaan',
+        destination: 'Lokasi B',
+        distanceKm: 2.0,
+        itemCount: 500,
+        estimatedCostRp: 30000,
+        travelTimeMinutes: 10,
+      ),
+    ];
+
+    final ranked = SpkCalculator.rankBySaw(candidates);
+    expect(ranked.length, 2);
+    expect(ranked.first.storeName, 'Toko Dekat Banyak Permintaan');
+    expect(ranked.first.sawScore, closeTo(1.0, 0.001));
+    expect(ranked.last.sawScore, lessThan(ranked.first.sawScore));
   });
 }
